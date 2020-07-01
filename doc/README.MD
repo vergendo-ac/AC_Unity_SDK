@@ -9,3 +9,14 @@
 ### OpenAPI
 
 https://developer.augmented.city/doc#operation/localize
+
+
+### Generate proxy
+
+```shell
+npx openapi-generator generate -i swagger.json -g csharp-netcore -o ./unity_sdk/client/
+```
+
+```shell
+npx openapi-generator generate -i swagger.json -g kotlin -o ./android_sdk/client/
+```
