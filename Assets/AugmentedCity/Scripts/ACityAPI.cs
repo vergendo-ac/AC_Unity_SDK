@@ -46,7 +46,7 @@ public class ACityAPI : MonoBehaviour
     string apiURL;
     Action<StickerInfo[]> getStickersAction;
 
-    
+
     LocalizationStatus localizationStatus = LocalizationStatus.NotStarted;
 
     void Start()
@@ -64,21 +64,48 @@ public class ACityAPI : MonoBehaviour
 
     void SetCameraConfiguration()
     {
+        
+        #if UNITY_IOS
         using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
         {
             Debug.Log("configurations.Length =   " + configurations.Length);
 
-            // Get that configuration by index
-            var configuration = configurations[configurations.Length - 1];
+            int needConfingurationNumber = 0;
             for (int i = 0; i < configurations.Length; i++)
             {
                 Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
+                if (configurations[i].height == 1080) { needConfingurationNumber = i;}
             }
+            Debug.Log("Config number: " + needConfingurationNumber);
+            // Get that configuration by index
+            var configuration = configurations[needConfingurationNumber];   
             // Make it the active one
             m_CameraManager.currentConfiguration = configuration;
         }
-        configurationSetted = true;
-    }
+
+        #endif
+
+        #if PLATFORM_ANDROID
+            using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
+            {
+                Debug.Log("configurations.Length =   " + configurations.Length);
+
+                int needConfingurationNumber = configurations.Length - 1;
+
+                for (int i = 0; i < configurations.Length; i++)
+                {
+                    Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
+                    if (configurations[i].height == 1080) { needConfingurationNumber = i; }
+                }
+                Debug.Log("Config number: " + needConfingurationNumber);
+                // Get that configuration by index
+                var configuration = configurations[needConfingurationNumber];
+                // Make it the active one
+                m_CameraManager.currentConfiguration = configuration;
+            }
+        #endif
+            configurationSetted = true;
+        }
 
     public unsafe string CamGetFrame()
     {
@@ -128,6 +155,9 @@ public class ACityAPI : MonoBehaviour
             m_Texture.Apply();
 
             Texture2D normTex = rotateTexture(m_Texture, false);
+
+ 
+
             byte[] bb = normTex.EncodeToJPG();
             string pathToScreen = Application.persistentDataPath + "/augframe.jpg";
             if (File.Exists(pathToScreen)) File.Delete(pathToScreen);
@@ -271,7 +301,7 @@ public class ACityAPI : MonoBehaviour
         cameraRotationInLocalization = ARCamera.transform.rotation.eulerAngles;
         cameraPositionInLocalization = ARCamera.transform.position;
         if (framePath != null) {
-            StartCoroutine(UploadJPGwithGPS(framePath, apiURL, langitude, latitude));
+            uploadFrame(framePath, apiURL, langitude, latitude, camLocalize);
         }
     }
 
@@ -279,7 +309,12 @@ public class ACityAPI : MonoBehaviour
         apiURL = url;
     }
 
-    IEnumerator UploadJPGwithGPS(string filePath, string apiURL, float langitude, float latitude)
+    public void uploadFrame(string framePath, string apiURL, float langitude, float latitude, Action<string> getJsonCameraObjects)
+    {
+        StartCoroutine(UploadJPGwithGPS(framePath, apiURL, langitude, latitude, getJsonCameraObjects));
+    }
+
+    IEnumerator UploadJPGwithGPS(string filePath, string apiURL, float langitude, float latitude, Action<string> getJsonCameraObjects)
     {
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
         byte[] bytes = File.ReadAllBytes(filePath);
@@ -297,7 +332,7 @@ public class ACityAPI : MonoBehaviour
         if (w.isNetworkError || w.isHttpError) { print(w.error); localizationStatus = LocalizationStatus.ServerError;}
         else { print("Finished Uploading Screenshot"); }
         Debug.Log(w.downloadHandler.text);
-        camLocalize(w.downloadHandler.text);
+        getJsonCameraObjects(w.downloadHandler.text);
     }
 
 
