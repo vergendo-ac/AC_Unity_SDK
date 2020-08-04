@@ -1,0 +1,551 @@
+openapi: 3.0.0
+info:
+  description: |
+    ## Description
+    This is an API for the Augmented City platform
+    ## Other resources
+    For more information, please visit our website [https://www.augmented.city](https://www.augmented.city/)
+  title: Augmented City API
+  contact:
+    email: support@vergendo.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  x-logo:
+    url: 'https://images.squarespace-cdn.com/content/5dc18d1bdf3c7b576d0cac36/1574164738499-ZCTSEOCMPZNPVTTNHZXF/augmentedcity-colorlogo.png?content-type=image%2Fpng'
+    altText: AugmentedCity
+  version: 1.1.2
+servers:
+  - description: AC Server
+    url: 'http://developer.vergendo.com:5000/api'
+    variables:
+      port:
+        enum:
+          - '5000'
+        default: '5000'
+      basePath:
+        default: api
+tags:
+  - name: object
+    description: Operations with objects
+    x-displayName: Object operations
+  - name: localization
+    description: Localization and scene acquisition
+    x-displayName: Localization and scene acquisition
+  - name: series
+    description: Operations with series
+    x-displayName: Series operations
+  - name: Version
+    description: Get server version
+    x-displayName: Version
+paths:
+  /object:
+    post:
+      tags:
+        - object
+      summary: Add an object
+      operationId: addObject
+      description: Add a new user object into database
+      parameters:
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            default: application/vnd.myplace.v1+json
+      responses:
+        '200':
+          description: Object processed
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    properties:
+                      objects_info:
+                        $ref: '#/components/schemas/ObjectsInfo'
+                  - $ref: '#/components/schemas/Status'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - image
+                - description
+              properties:
+                image:
+                  type: string
+                  format: binary
+                description:
+                  $ref: '#/components/schemas/StickerDescription'
+  /get_objects:
+    post:
+      tags:
+        - localization
+      summary: Return objects
+      operationId: getObjects
+      description: Localize uploaded image and return objects info and scene
+      parameters:
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            default: application/vnd.myplace.v1+json
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - sticker
+              - placeholder
+            default: sticker
+          description: If not specified type is sticker
+        - name: scene_format
+          in: query
+          schema:
+            type: string
+            enum:
+              - none
+              - render
+              - json_2d
+              - json_3d
+            default: none
+          description: If not specified scene_format is none
+      responses:
+        '200':
+          description: Scene and objects info returned
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - oneOf:
+                      - type: object
+                        required:
+                          - objects_info
+                        properties:
+                          objects_info:
+                            $ref: '#/components/schemas/ObjectsInfo'
+                          scene:
+                            type: string
+                      - type: object
+                        required:
+                          - objects_info
+                          - scene
+                        properties:
+                          objects_info:
+                            $ref: '#/components/schemas/ObjectsInfo'
+                          scene:
+                            type: string
+                      - type: object
+                        required:
+                          - objects_info
+                          - scene
+                        properties:
+                          objects_info:
+                            $ref: '#/components/schemas/ObjectsInfo'
+                          scene:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                node:
+                                  type: object
+                                  required:
+                                    - id
+                                    - distance
+                                    - points
+                                  properties:
+                                    id:
+                                      type: string
+                                    distance:
+                                      type: string
+                                    points:
+                                      $ref: '#/components/schemas/ArrayOf2DPoints'
+                      - type: object
+                        required:
+                          - objects_info
+                          - scene
+                        properties:
+                          objects_info:
+                            $ref: '#/components/schemas/ObjectsInfo'
+                          scene:
+                            type: array
+                            items:
+                              oneOf:
+                                - type: object
+                                  required:
+                                    - node
+                                  properties:
+                                    node:
+                                      $ref: '#/components/schemas/3DSceneNode'
+                                - type: object
+                                  required:
+                                    - camera
+                                  properties:
+                                    camera:
+                                      $ref: '#/components/schemas/3DPose'
+                  - $ref: '#/components/schemas/Status'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: An image to make a query by
+  /localizer/localize:
+    post:
+      tags:
+        - localization
+      summary: Localize camera
+      operationId: localize
+      description: Localize uploaded image. Return camera pose and optional objects info and scene. Objects info and scene are sent on coordinate system change.
+      parameters:
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            default: application/vnd.myplace.v2+json
+      responses:
+        '200':
+          description: Camera pose and optional objects info and scene
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalizationResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - description
+                - image
+              properties:
+                description:
+                  type: object
+                  required:
+                    - gps
+                  properties:
+                    gps:
+                      type: object
+                      required:
+                        - latitude
+                        - longitude
+                      properties:
+                        latitude:
+                          type: number
+                          format: float
+                        longitude:
+                          type: number
+                          format: float
+                        altitude:
+                          type: number
+                          format: float
+                        hdop:
+                          type: number
+                          format: float
+                    focal_length_in_35mm_film:
+                      type: integer
+                    mirrored:
+                      type: boolean
+                      default: false
+                    rotation:
+                      type: integer
+                      enum:
+                        - 0
+                        - 90
+                        - 180
+                        - 270
+                      default: 0
+                      description: Clockwise camera rotation
+                image:
+                  type: string
+                  format: binary
+                  description: A JPEG-encoded query image
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+              description: 'A JPEG-encoded query image, must include GPS data in EXIF tags'
+  /localizer/prepare:
+    get:
+      tags:
+        - localization
+      summary: Prepare localization session
+      operationId: prepare
+      description: Prepare for localization for given geolocation. Causes server to load nearby reconstructions for localization. Returns an error when localization in this location is not possible.
+      parameters:
+        - in: header
+          name: Accept
+          required: true
+          schema:
+            type: string
+            default: application/vnd.myplace.v2+json
+        - in: query
+          name: lat
+          required: true
+          schema:
+            type: number
+            format: double
+          description: GPS latitude
+        - in: query
+          name: lon
+          required: true
+          schema:
+            type: number
+            format: double
+          description: GPS longitude
+        - in: query
+          name: alt
+          schema:
+            type: number
+            format: double
+          description: GPS altitude (optional)
+        - in: query
+          name: dop
+          schema:
+            type: number
+            format: double
+          description: GPS HDOP (optional)
+      responses:
+        '200':
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /server_version:
+    get:
+      tags:
+        - Version
+      summary: Get server version
+      description: Get server version
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: '2.7-1-g926829c AC-178-add_versioning 2020.06.19 13:12'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+            example: '2.7-1-g926829c AC-178-add_versioning 2020.06.19 13:12'
+components:
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        text/plain:
+          schema:
+            type: string
+    ServerError:
+      description: Internal Server Error
+      content:
+        text/plain:
+          schema:
+            type: string
+    NotFound:
+      description: Not Found
+      content:
+        text/plain:
+          schema:
+            type: string
+  schemas:
+    Status:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: object
+          required:
+            - code
+          properties:
+            code:
+              type: integer
+              enum:
+                - 0
+                - 1
+                - 2
+              description: |+
+                | State   | Code   |  Description  |
+                  | -- | -- | -- |
+                  | Success | 0 | Operation completed successfully |
+                  | Fail | 1 | Operation failed, message field contains a description |
+                  |  Server error | 2 | Some internal server error occurred  |
+
+            message:
+              type: string
+    Error400:
+      type: string
+    Error500:
+      type: string
+    LocalizationResult:
+      allOf:
+        - type: object
+          required:
+            - camera
+            - scene_id
+            - status
+            - surfaces
+          properties:
+            camera:
+              $ref: '#/components/schemas/3DPose'
+            objects_info:
+              $ref: '#/components/schemas/ObjectsInfo'
+            scene_id:
+              type: string
+            scene:
+              type: array
+              items:
+                type: object
+                required:
+                  - node
+                properties:
+                  node:
+                    $ref: '#/components/schemas/3DSceneNode'
+            surfaces:
+              type: array
+              items:
+                type: object
+                properties:
+                  frame:
+                    $ref: '#/components/schemas/SurfaceFrame'
+                  pose:
+                    $ref: '#/components/schemas/3DPose'
+        - $ref: '#/components/schemas/Status'
+    3DPose:
+      type: object
+      required:
+        - position
+        - orientation
+      properties:
+        position:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items:
+            type: number
+            format: float
+        orientation:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            type: number
+            format: float
+    3DSceneNode:
+      type: object
+      required:
+        - id
+        - points
+      properties:
+        id:
+          type: string
+        points:
+          $ref: '#/components/schemas/ArrayOf3DPoints'
+    ObjectsInfo:
+      type: array
+      items:
+        type: object
+        required:
+          - sticker
+          - placeholder
+        properties:
+          sticker:
+            type: object
+            required:
+              - path
+              - sticker_text
+              - sticker_type
+            properties:
+              sticker_id:
+                type: string
+              path:
+                type: string
+              sticker_text:
+                type: string
+              sticker_type:
+                type: string
+              sticker_detailed_type:
+                type: string
+            additionalProperties: true
+          placeholder:
+            type: object
+            required:
+              - placeholder_id
+            properties:
+              placeholder_id:
+                type: string
+    StickerDescription:
+      type: object
+      properties:
+        sticker:
+          type: object
+          properties:
+            path:
+              type: string
+            sticker_text:
+              type: string
+        placeholder:
+          type: object
+          properties:
+            projections:
+              type: object
+              properties:
+                points:
+                  $ref: '#/components/schemas/ArrayOf2DPoints'
+                filename:
+                  type: string
+    SurfaceFrame:
+      $ref: '#/components/schemas/ArrayOf2DPoints'
+      minItems: 2
+      maxItems: 2
+    ArrayOf2DPoints:
+      type: array
+      items:
+        type: array
+        minItems: 2
+        maxItems: 2
+        items:
+          type: number
+          format: float
+    ArrayOf3DPoints:
+      type: array
+      items:
+        type: array
+        minItems: 3
+        maxItems: 3
+        items:
+          type: number
+          format: float
