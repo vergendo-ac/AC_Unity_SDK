@@ -220,11 +220,11 @@ namespace Org.OpenAPITools.Api
             Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
 
             String[] _contentTypes = new String[] {
-                "text/plain"
             };
 
             // to determine the Accept header
             String[] _accepts = new String[] {
+                "*/*",
                 "text/plain"
             };
 
@@ -274,11 +274,11 @@ namespace Org.OpenAPITools.Api
             Org.OpenAPITools.Client.RequestOptions localVarRequestOptions = new Org.OpenAPITools.Client.RequestOptions();
 
             String[] _contentTypes = new String[] {
-                "text/plain"
             };
 
             // to determine the Accept header
             String[] _accepts = new String[] {
+                "*/*",
                 "text/plain"
             };
             

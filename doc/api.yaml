@@ -346,7 +346,7 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
+            '*/*':
               schema:
                 type: string
               example: '2.7-1-g926829c AC-178-add_versioning 2020.06.19 13:12'
@@ -356,7 +356,7 @@ paths:
           $ref: '#/components/responses/ServerError'
       requestBody:
         content:
-          text/plain:
+          '*/*':
             schema:
               type: string
             example: '2.7-1-g926829c AC-178-add_versioning 2020.06.19 13:12'

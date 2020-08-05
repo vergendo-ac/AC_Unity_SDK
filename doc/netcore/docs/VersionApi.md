@@ -67,8 +67,8 @@ No authorization required
 
 ### HTTP request headers
 
- - **Content-Type**: text/plain
- - **Accept**: text/plain
+ - **Content-Type**: Not defined
+ - **Accept**: */*, text/plain
 
 ### HTTP response details
 | Status code | Description | Response headers |

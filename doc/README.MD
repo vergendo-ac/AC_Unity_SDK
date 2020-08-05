@@ -14,9 +14,10 @@ https://developer.augmented.city/doc#operation/localize
 ### Generate proxy
 
 ```shell
-npx openapi-generator generate -i swagger.json -g csharp-netcore -o ./unity_sdk/client/
+npx openapi-generator generate -i api.yaml -g csharp-netcore -o ./netcore
 ```
 
+Run test
 ```shell
-npx openapi-generator generate -i swagger.json -g kotlin -o ./android_sdk/client/
+dotnet test --filter "Org.OpenAPITools.Test.VersionApiTests.ServerVersionGetTest"
 ```
