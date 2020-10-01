@@ -60,12 +60,3 @@ getJsonCameraObjects - Action which will recieve JSON string data
 
 
 
-
-
-
-
-
-
-
-
-

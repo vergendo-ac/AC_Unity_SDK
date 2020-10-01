@@ -34,7 +34,7 @@ public class ACityAPI : MonoBehaviour
     }
 
     bool editorTestMode;
-    public string ServerAPI = "http://developer.augmented.city/api/localizer/localize";
+    public string ServerAPI = "https://developer.augmented.city/api/localizer/localize";
 
     Vector3 cameraRotationInLocalization;
     Vector3 cameraPositionInLocalization;
@@ -197,29 +197,24 @@ public class ACityAPI : MonoBehaviour
     {
         var jsonParse = JSON.Parse(jsonanswer);
         float px, py, pz, ox, oy, oz, ow;
-        int nodeAmount = -1; string js;
+        int objectsAmount = -1; string js;
         if (jsonParse["camera"] != null)
         {
-            Debug.Log("PATH  " + jsonParse["objects_info"][0]["sticker"]["path"]);
-            Debug.Log("sticker_id  " + jsonParse["objects_info"][0]["sticker"]["sticker_id"]);
-            Debug.Log("Object  " + jsonParse["scene"][0]["node"]["id"]);
-            Debug.Log("Camera  " + jsonParse["camera"]["position"][0].AsFloat);
-
             do
             {
-                nodeAmount++;
-                js = jsonParse["scene"][nodeAmount]["node"]["points"][0][0];
-                Debug.Log("js node [" + nodeAmount + "]  - " + js);
+                objectsAmount++;
+                js = jsonParse["placeholders"][objectsAmount]["placeholder_id"];
+                Debug.Log("js node [" + objectsAmount + "]  - " + js);
             } while (js != null);
 
-            Debug.Log("nodeAmount =   " + nodeAmount);
-            px = jsonParse["camera"]["position"][0].AsFloat;
-            py = jsonParse["camera"]["position"][1].AsFloat;
-            pz = jsonParse["camera"]["position"][2].AsFloat;
-            ox = jsonParse["camera"]["orientation"][0].AsFloat;
-            oy = jsonParse["camera"]["orientation"][1].AsFloat;
-            oz = jsonParse["camera"]["orientation"][2].AsFloat;
-            ow = jsonParse["camera"]["orientation"][3].AsFloat;
+            Debug.Log("Objects amount =   " + objectsAmount);
+            px = jsonParse["camera"]["pose"]["position"]["x"].AsFloat;
+            py = jsonParse["camera"]["pose"]["position"]["y"].AsFloat;
+            pz = jsonParse["camera"]["pose"]["position"]["z"].AsFloat;
+            ox = jsonParse["camera"]["pose"]["orientation"]["x"].AsFloat;
+            oy = jsonParse["camera"]["pose"]["orientation"]["y"].AsFloat;
+            oz = jsonParse["camera"]["pose"]["orientation"]["z"].AsFloat;
+            ow = jsonParse["camera"]["pose"]["orientation"]["w"].AsFloat;
             GameObject newCam = new GameObject("tempCam"); 
             newCam.transform.localPosition = new Vector3(px, py, pz);
             newCam.transform.localRotation = new Quaternion(ox, oy, oz, ow);
@@ -228,40 +223,41 @@ public class ACityAPI : MonoBehaviour
             newCam.transform.localRotation = Quaternion.Euler(-newCam.transform.localRotation.eulerAngles.x, newCam.transform.localRotation.eulerAngles.y, -newCam.transform.localRotation.eulerAngles.z);
 
 
-            GameObject[,] placeHolders = new GameObject[nodeAmount, 4];
-            StickerInfo[] stickers = new StickerInfo[nodeAmount];
+            GameObject[,] placeHolders = new GameObject[objectsAmount, 4];
+            StickerInfo[] stickers = new StickerInfo[objectsAmount];
 
-            for (int j = 0; j < nodeAmount; j++)
+            for (int j = 0; j < objectsAmount; j++)
             {
                 stickers[j] = new StickerInfo();
-                Debug.Log("Error?? "+ j + jsonParse["objects_info"][j]["sticker"]["path"]);
-                Debug.Log("Error?? " + j + jsonParse["objects_info"][j]["sticker"]["sticker_text"]);
+                float positionObjX = jsonParse["placeholders"][j]["pose"]["position"]["x"].AsFloat;
+                float positionObjY = jsonParse["placeholders"][j]["pose"]["position"]["y"].AsFloat;
+                float positionObjZ = jsonParse["placeholders"][j]["pose"]["position"]["z"].AsFloat;
 
                 for (int i = 0; i < 4; i++)
                 {
-                    px = jsonParse["scene"][j]["node"]["points"][i][0].AsFloat;
-                    py = jsonParse["scene"][j]["node"]["points"][i][1].AsFloat;
-                    pz = jsonParse["scene"][j]["node"]["points"][i][2].AsFloat;
+                    px = jsonParse["placeholders"][j]["frame"][i]["x"].AsFloat + positionObjX;
+                    py = jsonParse["placeholders"][j]["frame"][i]["y"].AsFloat + positionObjY;
+                    pz = jsonParse["placeholders"][j]["frame"][i]["z"].AsFloat + positionObjZ;
                     placeHolders[j, i] = new GameObject("Placeholder" + j +" " + i);
                     placeHolders[j, i].transform.SetParent(newCam.transform);
                     py = -py;
                     placeHolders[j, i].transform.position = new Vector3(px, py, pz);
                 }
-                string idnode = "" + jsonParse["scene"][j]["node"]["id"];
-                for (int x = 0; x < nodeAmount; x++)
+                string idnode = "" + jsonParse["placeholders"][j]["placeholder_id"];
+                for (int x = 0; x < objectsAmount; x++)
                 {
-                    string idobj = "" + jsonParse["objects_info"][x]["sticker"]["sticker_id"];
+                    string idobj = "" + jsonParse["objects"][x]["sticker"]["sticker_id"];
                     if (idobj.Contains(idnode))
                     {
-                        stickers[j].sPath = "" + jsonParse["objects_info"][x]["sticker"]["path"];
-                        stickers[j].sText = "" + jsonParse["objects_info"][x]["sticker"]["sticker_text"];
+                        stickers[j].sPath = "" + jsonParse["objects"][x]["sticker"]["path"];
+                        stickers[j].sText = "" + jsonParse["objects"][x]["sticker"]["sticker_text"];
                     }
                 }
             }
             newCam.transform.position = cameraPositionInLocalization;
             newCam.transform.eulerAngles = cameraRotationInLocalization;
 
-            for (int j = 0; j < nodeAmount; j++)
+            for (int j = 0; j < objectsAmount; j++)
             {
                 stickers[j].positions = new Vector3[4];
 
@@ -296,6 +292,7 @@ public class ACityAPI : MonoBehaviour
         if (!editorTestMode)
         {
             framePath = CamGetFrame();
+            Debug.Log("framePath =" + framePath);
         }
         else { framePath = path; }
         cameraRotationInLocalization = ARCamera.transform.rotation.eulerAngles;
@@ -325,14 +322,15 @@ public class ACityAPI : MonoBehaviour
         form.Add(new MultipartFormFileSection("image", bytes, "test.jpg", "image/jpeg"));
         form.Add(new MultipartFormDataSection("description", jsona));
         byte[] boundary = UnityWebRequest.GenerateBoundary();
-        var w = UnityWebRequest.Post(apiURL, form, boundary);
-        w.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");
-        w.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
-        yield return w.SendWebRequest();
-        if (w.isNetworkError || w.isHttpError) { print(w.error); localizationStatus = LocalizationStatus.ServerError;}
-        else { print("Finished Uploading Screenshot"); }
-        Debug.Log(w.downloadHandler.text);
-        getJsonCameraObjects(w.downloadHandler.text);
+        var request = UnityWebRequest.Post(apiURL, form, boundary);
+        request.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");
+        request.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
+        Debug.Log("Uploading Screenshot started...");
+        yield return request.SendWebRequest();
+        if (request.isNetworkError || request.isHttpError) { Debug.Log(request.error); localizationStatus = LocalizationStatus.ServerError;}
+        else { Debug.Log("Finished Uploading Screenshot"); }
+        Debug.Log(request.downloadHandler.text);
+        getJsonCameraObjects(request.downloadHandler.text);
     }
 
 

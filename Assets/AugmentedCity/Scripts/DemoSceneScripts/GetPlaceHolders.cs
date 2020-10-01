@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class GetPlaceHolders : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class GetPlaceHolders : MonoBehaviour
         acapi = GetComponent<ACityAPI>();
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
+
 
     public void startLocalization() {
         acapi.ARLocation(showPlaceHolders);
