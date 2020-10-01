@@ -34,7 +34,7 @@ public class ACityAPI : MonoBehaviour
     }
 
     bool editorTestMode;
-    public string ServerAPI = "https://developer.augmented.city/api/localizer/localize";
+    public string ServerAPI = "http://developer.augmented.city/api/localizer/localize";
 
     Vector3 cameraRotationInLocalization;
     Vector3 cameraPositionInLocalization;
