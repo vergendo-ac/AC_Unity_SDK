@@ -3218,7 +3218,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 0, y: 0, z: 7.218e-42, w: 5.9e-44}
+  m_BoundingSphereOverride: {x: 0, y: 4e-45, z: 5.014e-42, w: 5.9e-44}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -7126,7 +7126,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ABloader: {fileID: 5134400709888703073, guid: 58b2d06e7c50a49499df2ffe48883476,
     type: 3}
-  modelPath: https://glazar.infobox.vip/augcity/android/
+  modelPath: https://glazar.infobox.vip/augcity/
   activeButtonImage: {fileID: 0}
   groundPlane: {fileID: 2398405419720274315, guid: e405bbbe06e0b534cb580adcdc8d8b58,
     type: 3}
