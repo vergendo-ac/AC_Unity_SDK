@@ -14,6 +14,15 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 
+/ACViewer-SDK/[Ll]ibrary/
+/ACViewer-SDK/[Tt]emp/
+/ACViewer-SDK/[Oo]bj/
+/ACViewer-SDK/[Bb]uild/
+/ACViewer-SDK/[Bb]uilds/
+/ACViewer-SDK/[Ll]ogs/
+/ACViewer-SDK/[Uu]ser[Ss]ettings/
+
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
