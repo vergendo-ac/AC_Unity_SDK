@@ -68,7 +68,7 @@ public class ACityAPIDev : MonoBehaviour
     Vector3 cameraRotationInLocalization;
     Vector3 cameraPositionInLocalization;
     float cameraDistance;
-    float longitude, latitude;
+    float longitude, latitude, hdop;
     public float tempScale3d;
     public float globalTimer;
     float serverTimer;
@@ -124,8 +124,10 @@ public class ACityAPIDev : MonoBehaviour
 
     void SetCameraConfiguration()
     {
-        
-        #if UNITY_IOS
+        if (!PlayerPrefs.HasKey("config"))
+        {
+            int needConfingurationNumber = 0;
+#if UNITY_IOS
         using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
         {
             Debug.Log("configurations.Length =   " + configurations.Length);
@@ -143,14 +145,14 @@ public class ACityAPIDev : MonoBehaviour
             m_CameraManager.currentConfiguration = configuration;
         }
 
-        #endif
+#endif
 
-        #if PLATFORM_ANDROID
+#if PLATFORM_ANDROID
             using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
             {
                 Debug.Log("configurations.Length =   " + configurations.Length);
                 bool needConfFounded = false;
-                int needConfingurationNumber = configurations.Length - 1;
+                needConfingurationNumber = configurations.Length - 1;
 
                 for (int i = 0; i < configurations.Length; i++)
                 {
@@ -163,9 +165,11 @@ public class ACityAPIDev : MonoBehaviour
                 // Make it the active one
                 m_CameraManager.currentConfiguration = configuration;
             }
-        #endif
-            configurationSetted = true;
+#endif
+            PlayerPrefs.SetInt("config", needConfingurationNumber);
         }
+        configurationSetted = true;
+    }
 
     public unsafe byte[] CamGetFrame()
     {
@@ -212,10 +216,10 @@ public class ACityAPIDev : MonoBehaviour
 
             m_Texture.LoadRawTextureData(buffer);
             m_Texture.Apply();
+            buffer.Dispose();
 
-            Texture2D normTex = m_Texture;
-
-            byte[] bb = normTex.EncodeToJPG(100);
+            byte[] bb = m_Texture.EncodeToJPG(100);
+            Destroy(m_Texture);
             return bb;
         }
         return null;
@@ -620,10 +624,11 @@ public class ACityAPIDev : MonoBehaviour
         {
             StartCoroutine(Locate(firstLocalization));
         }
-        else firstLocalization(latitude, longitude, null, null);
+        else firstLocalization(latitude, longitude, hdop, null, null);
     }
 
-    public void firstLocalization(float langitude, float latitude, string path, Action<string, Transform, StickerInfo[]> getStickers) {
+    public void firstLocalization(float langitude, float latitude, float hdop, string path, Action<string, Transform, StickerInfo[]> getStickers)
+    {
         byte[] bjpg;
         string framePath;
         if (editorTestMode)
@@ -647,7 +652,7 @@ public class ACityAPIDev : MonoBehaviour
         cameraPositionInLocalization = ARCamera.transform.position;
         if (bjpg != null) {
             if (PlayerPrefs.HasKey("ApiUrl")) apiURL = PlayerPrefs.GetString("ApiUrl");
-            uploadFrame(bjpg, apiURL, langitude, latitude, camLocalize);
+            uploadFrame(bjpg, apiURL, langitude, latitude, hdop, camLocalize);
         }
     }
 
@@ -673,16 +678,16 @@ public class ACityAPIDev : MonoBehaviour
         return rinfo;
     }
 
-    public void uploadFrame(byte[] bytes, string apiURL, float langitude, float latitude, Action<string, bool> getJsonCameraObjects)
+    public void uploadFrame(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
     {
         if (!useOSCP)
         {
-            StartCoroutine(UploadJPGwithGPS(bytes, apiURL, langitude, latitude, getJsonCameraObjects));
+            StartCoroutine(UploadJPGwithGPS(bytes, apiURL, langitude, latitude, hdop, getJsonCameraObjects));
         }
-        else StartCoroutine(UploadJPGwithGPSOSCP(bytes, apiURL, langitude, latitude, getJsonCameraObjects));
+        else StartCoroutine(UploadJPGwithGPSOSCP(bytes, apiURL, langitude, latitude, hdop, getJsonCameraObjects));
     }
 
-    IEnumerator UploadJPGwithGPSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, Action<string, bool> getJsonCameraObjects)
+    IEnumerator UploadJPGwithGPSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
     {
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
         //  byte[] bytes = File.ReadAllBytes(filePath);
@@ -739,7 +744,7 @@ public class ACityAPIDev : MonoBehaviour
         getJsonCameraObjects(request.downloadHandler.text, true);
     }
 
-    IEnumerator UploadJPGwithGPS(byte[] bytes, string apiURL, float langitude, float latitude, Action<string, bool> getJsonCameraObjects)
+    IEnumerator UploadJPGwithGPS(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
     {
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
         Debug.Log("bytes = " + bytes.Length);
@@ -753,8 +758,8 @@ public class ACityAPIDev : MonoBehaviour
             if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft) { rotationDevice = "270"; }
         }
 
-        string jsona = "{\"gps\":{\"latitude\":" + langitude + ",\"longitude\":" + latitude + "},\"rotation\": " + rotationDevice + ",\"mirrored\": false}";
-        uim.gpsDebug(langitude, latitude);
+        string jsona = "{\"gps\":{\"latitude\":" + langitude + ",\"longitude\":" + latitude + ",\"hdop\":" + hdop + "},\"rotation\": " + rotationDevice + ",\"mirrored\": false}";
+        uim.gpsDebug(langitude, latitude, hdop);
         Debug.Log("" + jsona);
         form.Add(new MultipartFormFileSection("image", bytes, "test.jpg", "image/jpeg"));
         form.Add(new MultipartFormDataSection("description", jsona));
@@ -814,7 +819,7 @@ public class ACityAPIDev : MonoBehaviour
     }
 
 
-    IEnumerator Locate(Action<float, float, string, Action<string, Transform, StickerInfo[]>> getLocData)
+    IEnumerator Locate(Action<float, float, float, string, Action<string, Transform, StickerInfo[]>> getLocData)
     {
         Debug.Log("Started Locate GPS");
         localizationStatus = LocalizationStatus.GetGPSData;
@@ -854,14 +859,15 @@ public class ACityAPIDev : MonoBehaviour
         {
             // Access granted and location value could be retrieved
             Debug.Log("Location: " + Input.location.lastData.latitude + " " + Input.location.lastData.longitude + " " + Input.location.lastData.altitude + " " + Input.location.lastData.horizontalAccuracy + " " + Input.location.lastData.timestamp);
-            getLocData(Input.location.lastData.latitude, Input.location.lastData.longitude, null, null);
+            getLocData(Input.location.lastData.latitude, Input.location.lastData.longitude, Input.location.lastData.horizontalAccuracy, null, null);
             GPSlocation = true;
             longitude = Input.location.lastData.longitude;
             latitude = Input.location.lastData.latitude;
-            
+            hdop = Input.location.lastData.horizontalAccuracy;
         }
 
-
+        // Stop service if there is no need to query location updates continuously
+        //  Input.location.Stop();
     }
 
     public LocalizationStatus getLocalizationStatus() { return localizationStatus; }

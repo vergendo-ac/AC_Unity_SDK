@@ -84,7 +84,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
         devCamMat.mainTexture = tex;
         // acapi.firstLocalization(59.934320f, 30.272606f, devImagePath, showPlaceHolders); // 59.934320f, 30.272606f - ВО офис, двор
        //  acapi.firstLocalization(41.1224f, 16.8684f, devImagePath, showPlaceHolders); //Bari cafe lat=41.1224f, long=16.8684f
-         acapi.firstLocalization(43.40529f, 39.95574f, devImagePath, showPlaceHolders); // Sochi - 43.404521f, 39.954741f / / 43.404080, 39.954735// 43.404769, 39.954042//43.40529, 39.95574
+         acapi.firstLocalization(43.40529f, 39.95574f, 30, devImagePath, showPlaceHolders); // Sochi - 43.404521f, 39.954741f / / 43.404080, 39.954735// 43.404769, 39.954042//43.40529, 39.95574
         timerRelocation = timeForRelocation;
         ARStarted = true;
         relocationCompleted = false;
