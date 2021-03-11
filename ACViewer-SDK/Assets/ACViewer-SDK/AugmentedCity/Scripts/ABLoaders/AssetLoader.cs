@@ -85,9 +85,22 @@ using UnityEngine.Networking;
             Debug.Log("Check asset name");
         }*/
 
-          Debug.Log("Load Coroutine GOOO!!! =   " + BundleFullURL + ABName);
+#if UNITY_IOS
+
+        BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/"+ ABName + "/ios/bundle";
+
+        
+#endif
+
+#if PLATFORM_ANDROID
+        BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/" + ABName + "/android/bundle";
+#endif
+
+
+
+        Debug.Log("Load Bundle Path = " + BundleFullURL);
           CachedAssetBundle cab = new CachedAssetBundle(ABName, new Hash128(0,0));
-          using (UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(BundleFullURL + ABName, cab))
+          using (UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(BundleFullURL, cab))
           {
               preloader.LoadPercent(uwr);
               yield return uwr.SendWebRequest();

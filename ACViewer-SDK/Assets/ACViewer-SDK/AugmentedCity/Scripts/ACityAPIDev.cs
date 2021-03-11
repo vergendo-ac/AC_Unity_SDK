@@ -658,6 +658,8 @@ public class ACityAPIDev : MonoBehaviour
 
     public void setApiURL(string url) {
         apiURL = url;
+        PlayerPrefs.SetString("ApiUrl", apiURL);
+
     }
 
     RecoInfo checkRecoID(string newId)

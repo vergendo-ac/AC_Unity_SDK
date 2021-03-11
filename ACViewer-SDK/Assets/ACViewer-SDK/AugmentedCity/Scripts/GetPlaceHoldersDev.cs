@@ -170,7 +170,6 @@ public class GetPlaceHoldersDev : MonoBehaviour
                             GameObject model = Instantiate(GetComponent<ModelManager>().ABloader, placeHolderParent.transform);
                             string bundleName = stickers[j].sText.ToLower();
                             model.GetComponent<AssetLoader>().ABName = bundleName;
-                            model.GetComponent<AssetLoader>().BundleFullURL = GetComponent<ModelManager>().modelPath;
                             model.transform.localPosition = stickers[j].mainPositions;// * acapi.tempScale3d;
                             model.transform.localPosition = new Vector3(model.transform.localPosition.x,-model.transform.localPosition.y,model.transform.localPosition.z);
                             model.transform.localRotation = new Quaternion(stickers[j].orientations.x, stickers[j].orientations.y, stickers[j].orientations.z, stickers[j].orientations.w);
@@ -221,19 +220,6 @@ public class GetPlaceHoldersDev : MonoBehaviour
                         relocationCompleted = true;
 
                     }
-                    GameObject id3d = get3dFromLocal(id);
-                    if (id3d != null)
-                    {
-                        GameObject model = Instantiate(GetComponent<ModelManager>().ABloader, placeHolderParent.transform);
-                        model.GetComponent<AssetLoader>().ABName = id3d.name;
-                        model.GetComponent<AssetLoader>().BundleFullURL = GetComponent<ModelManager>().modelPath;
-                        model.transform.localPosition = id3d.transform.position;
-                        model.transform.localRotation = id3d.transform.rotation;
-                        model.GetComponent<Mover>().setLocked(true);
-                        Debug.Log("Loaded pos = " + id3d.transform.position + ", ori = " + id3d.transform.rotation);
-                        models.Add(model);
-                    }
-
 
                     turnOffVideoDemos(videoDemosTurn);
                     turnOffPlaceHolders(toShowPlaceHolders);
@@ -411,15 +397,6 @@ public class GetPlaceHoldersDev : MonoBehaviour
         Debug.Log("saved pos = " + coords + ", ori = " + orientation);
     }
 
-    public GameObject get3dFromLocal(string id) {
-        GameObject temp = null;
-        if (PlayerPrefs.HasKey(id)) {
-            temp = new GameObject(PlayerPrefs.GetString(id));
-            temp.transform.position = new Vector3(PlayerPrefs.GetFloat(id + "coordx"), PlayerPrefs.GetFloat(id + "coordy"), PlayerPrefs.GetFloat(id + "coordz"));
-            temp.transform.rotation = new Quaternion(PlayerPrefs.GetFloat(id + "orix"), PlayerPrefs.GetFloat(id + "oriy"), PlayerPrefs.GetFloat(id + "oriz"), PlayerPrefs.GetFloat(id + "oriw"));
-        }
-        return temp;
-    }
 
     public string getCurrentRecoId() {
         return lastLocalizedRecoId;
