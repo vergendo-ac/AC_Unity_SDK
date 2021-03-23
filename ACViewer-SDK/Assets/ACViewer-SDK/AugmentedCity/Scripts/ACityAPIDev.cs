@@ -126,21 +126,21 @@ public class ACityAPIDev : MonoBehaviour
     {
         if (!PlayerPrefs.HasKey("config"))
         {
-            int needConfingurationNumber = 0;
+            int needConfigurationNumber = 0;
 #if UNITY_IOS
-        using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
+            using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
         {
             Debug.Log("configurations.Length =   " + configurations.Length);
 
-            int needConfingurationNumber = 0;
+                needConfigurationNumber = 0;
             for (int i = 0; i < configurations.Length; i++)
             {
                 Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
-                if (configurations[i].height == 720) { needConfingurationNumber = i;}
+                if (configurations[i].height == 720) { needConfigurationNumber = i;}
             }
-            Debug.Log("Config number: " + needConfingurationNumber);
+            Debug.Log("Config number: " + needConfigurationNumber);
             // Get that configuration by index
-            var configuration = configurations[needConfingurationNumber];   
+            var configuration = configurations[needConfigurationNumber];   
             // Make it the active one
             m_CameraManager.currentConfiguration = configuration;
         }
@@ -152,21 +152,21 @@ public class ACityAPIDev : MonoBehaviour
             {
                 Debug.Log("configurations.Length =   " + configurations.Length);
                 bool needConfFounded = false;
-                needConfingurationNumber = configurations.Length - 1;
+                needConfigurationNumber = configurations.Length - 1;
 
                 for (int i = 0; i < configurations.Length; i++)
                 {
                     Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
-                    if ((configurations[i].height == 1080)&&(!needConfFounded)) { needConfingurationNumber = i; needConfFounded = true; }
+                    if ((configurations[i].height == 1080)&&(!needConfFounded)) { needConfigurationNumber = i; needConfFounded = true; }
                 }
-                Debug.Log("Config number: " + needConfingurationNumber);
+                Debug.Log("Config number: " + needConfigurationNumber);
                 // Get that configuration by index
-                var configuration = configurations[needConfingurationNumber];
+                var configuration = configurations[needConfigurationNumber];
                 // Make it the active one
                 m_CameraManager.currentConfiguration = configuration;
             }
 #endif
-            PlayerPrefs.SetInt("config", needConfingurationNumber);
+            PlayerPrefs.SetInt("config", needConfigurationNumber);
         }
         configurationSetted = true;
     }
