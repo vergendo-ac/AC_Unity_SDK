@@ -1,5 +1,0 @@
-sceneSetups:
-- path: Assets/ACViewer-SDK/AugmentedCity/Scenes/AugCityDemo.unity
-  isLoaded: 1
-  isActive: 1
-  isSubScene: 0
