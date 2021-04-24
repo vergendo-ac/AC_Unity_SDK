@@ -166,22 +166,36 @@ public class GetPlaceHoldersDev : MonoBehaviour
                             vidos.url = stickers[j].sPath;
                             videoURLs.Add(urlVid);
                         }
-                        else if (stickers[j].sSubType.Contains("3dobject")||stickers[j].sPath.Contains("3dobject")) {
+                        else if (stickers[j].sSubType.Contains("3dobject") ||
+                                 stickers[j].sPath.Contains("3dobject") ||
+                                 (stickers[j].sDescription.ToLower().Contains("transfer")) ||
+                                  stickers[j].type.ToLower().Contains("3d"))
+                        {
                             GameObject model = Instantiate(GetComponent<ModelManager>().ABloader, placeHolderParent.transform);
                             string bundleName = stickers[j].sText.ToLower();
+                            if (stickers[j].type.ToLower().Contains("3d"))
+                            {
+                                bundleName = stickers[j].bundleName.ToLower();
+                                if (string.IsNullOrEmpty(bundleName)) {
+                                    bundleName = stickers[j].sText.ToLower();  // return back to default bundle name as the 'name'
+                                }
+                            }
                             model.GetComponent<AssetLoader>().ABName = bundleName;
-                            model.transform.localPosition = stickers[j].mainPositions;// * acapi.tempScale3d;
-                            model.transform.localPosition = new Vector3(model.transform.localPosition.x,-model.transform.localPosition.y,model.transform.localPosition.z);
-                            model.transform.localRotation = new Quaternion(stickers[j].orientations.x, stickers[j].orientations.y, stickers[j].orientations.z, stickers[j].orientations.w);
+                            model.transform.localPosition = stickers[j].mainPositions; // * acapi.tempScale3d;
+                            model.transform.localRotation = new Quaternion(
+                                stickers[j].orientations.x,
+                                stickers[j].orientations.y,
+                                stickers[j].orientations.z,
+                                stickers[j].orientations.w);
 
-                               if (stickers[j].sTrajectoryPath.Length > 1) {
-                                   Trajectory tr = model.GetComponent<Trajectory>();
-                                   tr.go = true;
-                                   tr.acapi = acapi;
-                                   tr.sTrajectory = stickers[j].sTrajectoryPath;
-                                   tr.sTimePeriod = stickers[j].sTrajectoryPeriod;
-                                   tr.sOffset = stickers[j].sTrajectoryOffset;
-                               }
+                            if (stickers[j].sTrajectoryPath.Length > 1) {
+                                Trajectory tr = model.GetComponent<Trajectory>();
+                                tr.go = true;
+                                tr.acapi = acapi;
+                                tr.sTrajectory = stickers[j].sTrajectoryPath;
+                                tr.sTimePeriod = stickers[j].sTrajectoryPeriod;
+                                tr.sOffset = stickers[j].sTrajectoryOffset;
+                            }
 
                             Debug.Log(stickers[j].sTrajectoryPath);
 
@@ -189,14 +203,29 @@ public class GetPlaceHoldersDev : MonoBehaviour
                             Mover mover = model.GetComponent<Mover>();
                             mover.setLocked(true);
                             mover.objectId = stickers[j].objectId;
-                            if (bundleName.Contains("quar") || bundleName.Contains("santa") || bundleName.Contains("pavel") || bundleName.Contains("gard"))
+
+                            if (bundleName.Contains("nograv") || !stickers[j].vertical) {
+                                mover.noGravity = true;
+                            }
+
+                            if (stickers[j].grounded ||
+                                bundleName.Contains("quar") ||
+                                bundleName.Contains("santa") ||
+                                bundleName.Contains("pavel") ||
+                                bundleName.Contains("gard"))
                             {
                                 mover.landed = true;
                             }
 
                             Debug.Log(j+". 3dmodel "+ stickers[j].sText + " = " + model.transform.localPosition + " ROT Quaternion = " + model.transform.localRotation + " stickers[j].orientations = " + stickers[j].orientations);
                            
-                            if (stickers[j].SModel_scale.Length>0) model.transform.localScale = new Vector3(float.Parse(stickers[j].SModel_scale), float.Parse(stickers[j].SModel_scale), float.Parse(stickers[j].SModel_scale));
+                            if (stickers[j].SModel_scale.Length > 0) {
+                                model.transform.localScale = new Vector3(
+                                    float.Parse(stickers[j].SModel_scale),
+                                    float.Parse(stickers[j].SModel_scale),
+                                    float.Parse(stickers[j].SModel_scale)
+                                );
+                            }
                             models.Add(model);
                         }
                         else
@@ -215,10 +244,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 stickerObjects.Add(newSticker);
                             }
                         }
-                        Destroy(temp1); Destroy(temp2);
+
+                        Destroy(temp1);
+                        Destroy(temp2);
                         Destroy(temp3);
                         relocationCompleted = true;
-
                     }
 
                     turnOffVideoDemos(videoDemosTurn);
