@@ -16,7 +16,9 @@ public class Mover : MonoBehaviour
     private Vector2 oldt1, oldt2, oldtmax;
 
     bool locked = true;
-    public bool landed;
+    public bool landed;      // should the model be placed to a horizontal surface
+    public bool noGravity;   // should not only a vertical axis rotation of the model be applied, otherwise an azimuth angle is applied and only
+
     bool wasDoubleTouch, firstTouch, oneTouch;
     float timer;
     bool tapped, upped;
@@ -27,6 +29,7 @@ public class Mover : MonoBehaviour
     public string modelName;
     public string objectId;
     PlaneManager pm;
+
     void Start()
     {
         cam = Camera.main.gameObject;
@@ -39,13 +42,15 @@ public class Mover : MonoBehaviour
 
     void Update()
     {
-        myGO.transform.eulerAngles = new Vector3(0, myGO.transform.eulerAngles.y, 0);
-        if (landed && pm.yGround>-100 && locked) myGO.transform.position  = new Vector3(myGO.transform.position.x, pm.yGround, myGO.transform.position.z);
+        if (!noGravity) {
+            myGO.transform.eulerAngles = new Vector3(0, myGO.transform.eulerAngles.y, 0);
+        }
+        if (landed && pm.yGround > -100 && locked) {
+            myGO.transform.position = new Vector3(myGO.transform.position.x, pm.yGround, myGO.transform.position.z);
+        }
     }
 
-    void OnMouseDown()
-    {
-
+    void OnMouseDown() {
     }
 
     private Vector3 GetMouseAsWorldPoint()
@@ -59,9 +64,7 @@ public class Mover : MonoBehaviour
         return Camera.main.ScreenToWorldPoint(mousePoint);
     }
 
-    void OnMouseDrag()
-    {
-
+    void OnMouseDrag() {
     }
 
     void OnMouseUp() {
