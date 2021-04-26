@@ -134,22 +134,21 @@ public class ACityAPIDev : MonoBehaviour
             int needConfigurationNumber = 0;
 #if UNITY_IOS
             using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
-        {
-            Debug.Log("configurations.Length =   " + configurations.Length);
+            {
+                Debug.Log("configurations.Length =   " + configurations.Length);
 
                 needConfigurationNumber = 0;
-            for (int i = 0; i < configurations.Length; i++)
-            {
-                Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
-                if (configurations[i].height == 720) { needConfigurationNumber = i;}
+                for (int i = 0; i < configurations.Length; i++)
+                {
+                    Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
+                    if (configurations[i].height == 720) { needConfigurationNumber = i;}
+                }
+                Debug.Log("Config number: " + needConfigurationNumber);
+                // Get that configuration by index
+                var configuration = configurations[needConfigurationNumber];   
+                // Make it the active one
+                m_CameraManager.currentConfiguration = configuration;
             }
-            Debug.Log("Config number: " + needConfigurationNumber);
-            // Get that configuration by index
-            var configuration = configurations[needConfigurationNumber];   
-            // Make it the active one
-            m_CameraManager.currentConfiguration = configuration;
-        }
-
 #endif
 
 #if PLATFORM_ANDROID
@@ -158,7 +157,6 @@ public class ACityAPIDev : MonoBehaviour
                 Debug.Log("configurations.Length =   " + configurations.Length);
                 bool needConfFounded = false;
                 needConfigurationNumber = configurations.Length - 1;
-
                 for (int i = 0; i < configurations.Length; i++)
                 {
                     Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
@@ -715,7 +713,6 @@ public class ACityAPIDev : MonoBehaviour
     public void setApiURL(string url) {
         apiURL = url;
         PlayerPrefs.SetString("ApiUrl", apiURL);
-
     }
 
     RecoInfo checkRecoID(string newId)
@@ -919,9 +916,9 @@ public class ACityAPIDev : MonoBehaviour
             Debug.Log("Location: " + Input.location.lastData.latitude + " " + Input.location.lastData.longitude + " " + Input.location.lastData.altitude + " " + Input.location.lastData.horizontalAccuracy + " " + Input.location.lastData.timestamp);
             getLocData(Input.location.lastData.latitude, Input.location.lastData.longitude, Input.location.lastData.horizontalAccuracy, null, null);
             GPSlocation = true;
-            longitude = Input.location.lastData.longitude;
-            latitude = Input.location.lastData.latitude;
-            hdop = Input.location.lastData.horizontalAccuracy;
+            longitude  = Input.location.lastData.longitude;
+            latitude   = Input.location.lastData.latitude;
+            hdop       = Input.location.lastData.horizontalAccuracy;
         }
 
         // Stop service if there is no need to query location updates continuously
@@ -935,7 +932,7 @@ public class ACityAPIDev : MonoBehaviour
 
 
     void FixedUpdate() { 
-            globalTimer = serverTimer + Time.timeSinceLevelLoad;
+        globalTimer = serverTimer + Time.timeSinceLevelLoad;
     }
     void SetTimer(double timer)
     {
@@ -966,11 +963,8 @@ public class ACityAPIDev : MonoBehaviour
 
     public void TimerShow()
     {
-
         StartCoroutine(GetTimerC());
         Debug.Log("globalTimer = " + globalTimer);
-
     }
-
 
 }

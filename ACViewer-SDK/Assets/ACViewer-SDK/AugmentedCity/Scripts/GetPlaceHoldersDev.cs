@@ -72,7 +72,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
         Debug.Log(ans+"CLIENT");
     }
 
-    public void startDevLocation() { // Test loacalization from Unity Editor
+    public void startDevLocation() { // Test localization from Unity Editor
         if (acapi.editorTestMode) timeForRelocation = 100f;
         pastArCamCoordinates = arCamCoordinates;
         arCamCoordinates = new Vector3(aRcamera.transform.position.x, aRcamera.transform.position.y, aRcamera.transform.position.z);
@@ -82,9 +82,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
         Texture2D tex = new Texture2D(2, 2);
         tex.LoadImage(bytes);
         devCamMat.mainTexture = tex;
-        // acapi.firstLocalization(59.934320f, 30.272606f, devImagePath, showPlaceHolders); // 59.934320f, 30.272606f - ВО офис, двор
-       //  acapi.firstLocalization(41.1224f, 16.8684f, devImagePath, showPlaceHolders); //Bari cafe lat=41.1224f, long=16.8684f
-         acapi.firstLocalization(43.40529f, 39.95574f, 30, devImagePath, showPlaceHolders); // Sochi - 43.404521f, 39.954741f / / 43.404080, 39.954735// 43.404769, 39.954042//43.40529, 39.95574
+
+      //acapi.firstLocalization(59.93432f, 30.27261f, 30, devImagePath, showPlaceHolders); // Spb VO-yard
+      //acapi.firstLocalization(41.12240f, 16.86840f, 30, devImagePath, showPlaceHolders); // Bari cafe (lat=41.1224f, lon=16.8684f)
+        acapi.firstLocalization(43.40529f, 39.95574f, 30, devImagePath, showPlaceHolders); // Sochi: 43.404521f,39.954741f 43.404080,39.954735 43.404769,39.954042 43.40529,39.95574
+
         timerRelocation = timeForRelocation;
         ARStarted = true;
         relocationCompleted = false;
@@ -416,7 +418,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
 
     public void set3dToLocal(string id, string name, Vector3 coords, Quaternion orientation) {
         PlayerPrefs.SetString(id, name);
-        PlayerPrefs.SetFloat(id+"coordx", coords.x);
+        PlayerPrefs.SetFloat(id + "coordx", coords.x);
         PlayerPrefs.SetFloat(id + "coordy", coords.y);
         PlayerPrefs.SetFloat(id + "coordz", coords.z);
         PlayerPrefs.SetFloat(id + "orix", orientation.x);
