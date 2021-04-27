@@ -97,35 +97,32 @@ public class ACityAPIDev : MonoBehaviour
     void Start()
     {
         // PlayerPrefs.DeleteAll();
+        //UnityWebRequest.ClearCookieCache(); //FixMe: aco3d has it?
         globalTimer = -1;
-         ARCamera = Camera.main.gameObject;
+        ARCamera = Camera.main.gameObject;
         m_CameraManager = Camera.main.GetComponent<ARCameraManager>();
-        if (!PlayerPrefs.HasKey("ApiUrl")) setApiURL(ServerAPI);
-        else setApiURL(PlayerPrefs.GetString("ApiUrl"));
-        #if PLATFORM_ANDROID || UNITY_IOS
+        if (!PlayerPrefs.HasKey("ApiUrl"))
+            setApiURL(ServerAPI);
+        else
+            setApiURL(PlayerPrefs.GetString("ApiUrl"));
+
+#if PLATFORM_ANDROID || UNITY_IOS
         if (!Permission.HasUserAuthorizedPermission(Permission.FineLocation))
-            {
-                Permission.RequestUserPermission(Permission.FineLocation);
-            }
+        {
+            Permission.RequestUserPermission(Permission.FineLocation);
+        }
 #endif
 
 #if UNITY_EDITOR 
-
         editorTestMode = true;
         devButton.SetActive(true);
 #endif
-
         StartCoroutine(GetTimerC());
         Input.location.Start();
         uim = this.GetComponent<UIManager>();
-
     }
 
-    public void SetOSCPusage(bool os)
-    {
-        useOSCP = os;
-    }
-
+    public void SetOSCPusage(bool os) { useOSCP = os; }
 
     void SetCameraConfiguration()
     {
@@ -135,13 +132,12 @@ public class ACityAPIDev : MonoBehaviour
 #if UNITY_IOS
             using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
             {
-                Debug.Log("configurations.Length =   " + configurations.Length);
-
+                Debug.Log("configurations.Length = " + configurations.Length);
                 needConfigurationNumber = 0;
                 for (int i = 0; i < configurations.Length; i++)
                 {
                     Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
-                    if (configurations[i].height == 720) { needConfigurationNumber = i;}
+                    if (configurations[i].height == 720) { needConfigurationNumber = i; }
                 }
                 Debug.Log("Config number: " + needConfigurationNumber);
                 // Get that configuration by index
@@ -150,17 +146,18 @@ public class ACityAPIDev : MonoBehaviour
                 m_CameraManager.currentConfiguration = configuration;
             }
 #endif
-
 #if PLATFORM_ANDROID
             using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
             {
-                Debug.Log("configurations.Length =   " + configurations.Length);
-                bool needConfFounded = false;
+                Debug.Log("configurations.Length = " + configurations.Length);
+                bool needConfFound = false;
                 needConfigurationNumber = configurations.Length - 1;
                 for (int i = 0; i < configurations.Length; i++)
                 {
                     Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
-                    if ((configurations[i].height == 1080)&&(!needConfFounded)) { needConfigurationNumber = i; needConfFounded = true; }
+                    if ((configurations[i].height == 1080) && (!needConfFound)) {
+                        needConfigurationNumber = i; needConfFound = true;
+                    }
                 }
                 Debug.Log("Config number: " + needConfigurationNumber);
                 // Get that configuration by index
@@ -184,6 +181,7 @@ public class ACityAPIDev : MonoBehaviour
                 // Get the entire image.
                 inputRect = new RectInt(0, 0, image.width, image.height),
 
+                // Downsample by 1.
                 outputDimensions = new Vector2Int(image.width, image.height),
 
                 // Choose RGBA format.
@@ -202,7 +200,7 @@ public class ACityAPIDev : MonoBehaviour
             // Extract the image data
 
             image.Convert(conversionParams, new IntPtr(buffer.GetUnsafePtr()), buffer.Length);
-            Debug.Log("buffer.Length" + buffer.Length);
+            Debug.Log("buffer.Length = " + buffer.Length);
             // The image was converted to RGBA32 format and written into the provided buffer
             // so we can dispose of the CameraImage. We must do this or it will leak resources.
             image.Dispose();
@@ -255,6 +253,7 @@ public class ACityAPIDev : MonoBehaviour
                 oz = jsonParse["camera"]["pose"]["orientation"]["z"].AsFloat;
                 ow = jsonParse["camera"]["pose"]["orientation"]["w"].AsFloat;
                 uim.setDebugPose(px, py, pz, ox, oy, oz, ow, sessionId);
+
                 GameObject newCam = new GameObject("tempCam");
                 newCam.transform.localPosition = new Vector3(px, -py, pz); // change the Y axis direction
 
@@ -279,11 +278,13 @@ public class ACityAPIDev : MonoBehaviour
                         stickers = new StickerInfo[objectsAmount];
                         currentRi.stickerArray = new StickerInfo[objectsAmount];
                         GameObject[,] placeHolders = new GameObject[objectsAmount, 4];
+
                         for (int j = 0; j < objectsAmount; j++)
                         {
                             currentRi.stickerArray[j] = new StickerInfo();
                             stickers[j] = new StickerInfo();
                             currentRi.stickerArray[j].positions = new Vector3[4];
+
                             float positionObjX = jsonParse["placeholders"][j]["pose"]["position"]["x"].AsFloat;
                             float positionObjY = jsonParse["placeholders"][j]["pose"]["position"]["y"].AsFloat;
                             float positionObjZ = jsonParse["placeholders"][j]["pose"]["position"]["z"].AsFloat;
@@ -423,8 +424,6 @@ public class ACityAPIDev : MonoBehaviour
                         currentRi.stickerArray[j].sAddress = stickers[j].sAddress;
                         currentRi.stickerArray[j].sRating = stickers[j].sRating;
                         currentRi.stickerArray[j].sUrl_ta = stickers[j].sUrl_ta;
-
-
                     }
                     newCam.transform.position = cameraPositionInLocalization;
                     newCam.transform.eulerAngles = cameraRotationInLocalization;
@@ -453,7 +452,7 @@ public class ACityAPIDev : MonoBehaviour
             }
             else
             {
-                Debug.Log("Cant localize");
+                Debug.Log("Can't localize");
 
                 localizationStatus = LocalizationStatus.CantLocalize;
                 uim.setDebugPose(0, 0, 0, 0, 0, 0, 0, "cant loc");
@@ -472,7 +471,7 @@ public class ACityAPIDev : MonoBehaviour
                 {
                     objectsAmount++;
                     js = jsonParse["scrs"][objectsAmount]["type"];
-                    // Debug.Log("js node [" + objectsAmount + "]  - " + js);
+                    //Debug.Log("js node [" + objectsAmount + "] - " + js);
                 } while (js != null);
 
                 Debug.Log("nodeAmount =   " + objectsAmount + ", RecoArray Length = " + recoList.Count);
@@ -515,16 +514,27 @@ public class ACityAPIDev : MonoBehaviour
                             float positionObjX = jsonParse["scrs"][j]["content"]["geopose"]["local"]["position"]["x"].AsFloat;
                             float positionObjY = jsonParse["scrs"][j]["content"]["geopose"]["local"]["position"]["y"].AsFloat;
                             float positionObjZ = jsonParse["scrs"][j]["content"]["geopose"]["local"]["position"]["z"].AsFloat;
-                            currentRi.stickerArray[j].mainPositions = new Vector3(positionObjX, -positionObjY, positionObjZ);
-                            //  Debug.Log("currentRi.stickerArray[j].mainPositions = " + currentRi.stickerArray[j].mainPositions);
-                            stickers[j].mainPositions = new Vector3(positionObjX, -positionObjY, positionObjZ);
-                            currentRi.stickerArray[j].orientations = new Vector4(jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["x"].AsFloat, jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["y"].AsFloat, jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["z"].AsFloat, jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["w"].AsFloat);
+
+                            float orientationObjX = jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["x"].AsFloat;
+                            float orientationObjY = jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["y"].AsFloat;
+                            float orientationObjZ = jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["z"].AsFloat;
+                            float orientationObjW = jsonParse["scrs"][j]["content"]["geopose"]["local"]["orientation"]["w"].AsFloat;
+
+                            Quaternion tempQ = new Quaternion(orientationObjX, orientationObjY, orientationObjZ, orientationObjW);
+                            tempQ = Quaternion.Euler(-tempQ.eulerAngles.x, tempQ.eulerAngles.y, -tempQ.eulerAngles.z);  // change X,Z axes directions of rotation
+                            currentRi.stickerArray[j].orientations = new Vector4(tempQ.x, tempQ.y, tempQ.z, tempQ.w);
+
+                            currentRi.stickerArray[j].mainPositions = new Vector3(positionObjX, -positionObjY, positionObjZ);  // change the Y axis direction
+                            stickers[j].mainPositions = new Vector3(positionObjX, -positionObjY, positionObjZ);  // change the Y axis direction
+
+                            //Debug.Log("currentRi.stickerArray[j].mainPositions = " + currentRi.stickerArray[j].mainPositions);
+
                             stickers[j].orientations = currentRi.stickerArray[j].orientations;
-                            Debug.Log("!!!!! currentRi.stickerArray[" + j + "].orientations x" + currentRi.stickerArray[j].orientations.x + "   " + stickers[j].orientations.x);
+                         /* Debug.Log("!!!!! currentRi.stickerArray[" + j + "].orientations x" + currentRi.stickerArray[j].orientations.x + "   " + stickers[j].orientations.x);
                             Debug.Log("!!!!! currentRi.stickerArray[" + j + "].orientations y" + currentRi.stickerArray[j].orientations.y + "   " + stickers[j].orientations.y);
                             Debug.Log("!!!!! currentRi.stickerArray[" + j + "].orientations z" + currentRi.stickerArray[j].orientations.z + "   " + stickers[j].orientations.z);
                             Debug.Log("!!!!! currentRi.stickerArray[" + j + "].orientations w" + currentRi.stickerArray[j].orientations.w + "   " + stickers[j].orientations.w);
-
+                         */
                             for (int i = 0; i < 4; i++)
                             {
                                 px = jsonParse["scrs"][j]["content"]["geopose"]["local"]["frame"][i]["x"].AsFloat + positionObjX;
@@ -532,7 +542,7 @@ public class ACityAPIDev : MonoBehaviour
                                 pz = jsonParse["scrs"][j]["content"]["geopose"]["local"]["frame"][i]["z"].AsFloat + positionObjZ;
                                 placeHolders[j, i] = new GameObject("Placeholder" + j + " " + i);
                                 placeHolders[j, i].transform.SetParent(newCam.transform);
-                                py = -py;
+                                py = -py;  // change the Y axis direction
                                 placeHolders[j, i].transform.position = new Vector3(px, py, pz);
                                 currentRi.stickerArray[j].positions[i] = new Vector3(px, py, pz);
                             }
@@ -691,26 +701,30 @@ public class ACityAPIDev : MonoBehaviour
             framePath = path;
             bjpg = File.ReadAllBytes(framePath);
         }
-         else
+        else
         {
             bjpg = CamGetFrame();
             if (bjpg == null)
             {
-                Debug.Log("FRame getted NULL !!!");
+                Debug.Log("Frame has got NULL!!!");
                 bjpg = bb.bytes;
             }
         }
 
-        if (getStickers !=null) getStickersAction = getStickers;
+        if (getStickers != null) getStickersAction = getStickers;
         cameraRotationInLocalization = ARCamera.transform.rotation.eulerAngles;
         cameraPositionInLocalization = ARCamera.transform.position;
-        if (bjpg != null) {
-            if (PlayerPrefs.HasKey("ApiUrl")) apiURL = PlayerPrefs.GetString("ApiUrl");
+        if (bjpg != null)
+        {
+            if (PlayerPrefs.HasKey("ApiUrl")) {
+                apiURL = PlayerPrefs.GetString("ApiUrl");
+            }
             uploadFrame(bjpg, apiURL, langitude, latitude, hdop, camLocalize);
         }
     }
 
-    public void setApiURL(string url) {
+    public void setApiURL(string url)
+    {
         apiURL = url;
         PlayerPrefs.SetString("ApiUrl", apiURL);
     }
@@ -724,8 +738,7 @@ public class ACityAPIDev : MonoBehaviour
             {
                 Debug.Log(ri.id);
                 Debug.Log(newId);
-                if (ri.id.Contains(newId))
-                {
+                if (ri.id.Contains(newId)) {
                     rinfo = ri;
                 }
             }
@@ -750,24 +763,19 @@ public class ACityAPIDev : MonoBehaviour
         string rotationDevice = "180";
         if (!editorTestMode)
         {
-            if (Input.deviceOrientation == DeviceOrientation.Portrait) { rotationDevice = "0"; }
-            if (Input.deviceOrientation == DeviceOrientation.LandscapeRight) { rotationDevice = "90"; }
+            if (Input.deviceOrientation == DeviceOrientation.Portrait)           { rotationDevice =   "0"; }
+            if (Input.deviceOrientation == DeviceOrientation.LandscapeRight)     { rotationDevice =  "90"; }
             if (Input.deviceOrientation == DeviceOrientation.PortraitUpsideDown) { rotationDevice = "180"; }
-            if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft) { rotationDevice = "270"; }
+            if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft)      { rotationDevice = "270"; }
         }
 
         //  string shot = System.Text.Encoding.UTF8.GetString(bytes);
         string shot = Convert.ToBase64String(bytes);
         // Debug.Log("Uploading Screenshot started...");
 
-        string finalJson = "{\"id\":\"9089876676575754\",\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"type\":\"geopose\",\"sensors\":[{\"id\":\"0\",\"type\":\"camera\"},{\"id\":\"1\",\"type\":\"geolocation\"}],\"sensorReadings\":[{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"0\",\"reading\":{\"sequenceNumber\":0,\"imageFormat\":\"JPG\",\"imageOrientation\":{\"mirrored\":false,\"rotation\":" + rotationDevice + "},\"imageBytes\":\"" + shot + "\"}},{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"1\",\"reading\":{\"latitude\":" + langitude + ",\"longitude\":" + latitude + ",\"altitude\":0}}]}";
+        string finalJson = "{\"id\":\"9089876676575754\",\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"type\":\"geopose\",\"sensors\":[{\"id\":\"0\",\"type\":\"camera\"},{\"id\":\"1\",\"type\":\"geolocation\"}],\"sensorReadings\":[{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"0\",\"reading\":{\"sequenceNumber\":0,\"imageFormat\":\"JPG\",\"imageOrientation\":{\"mirrored\":false,\"rotation\":"+ rotationDevice +"},\"imageBytes\":\"" + shot + "\"}},{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"1\",\"reading\":{\"latitude\":" + langitude + ",\"longitude\":" + latitude + ",\"altitude\":0" + ",\"accuracy\":" + hdop + "}}]}";
         Debug.Log("finalJson OSCP = " + finalJson);
         Debug.Log(apiURL + "/scrs/geopose_objs_local");
-        /*  string path = "request.json";
-        //  File.Create(path);
-          StreamWriter writer = new StreamWriter(path, true, Encoding.UTF8, 1000000);
-          writer.WriteLine(finalJson);
-          writer.Close();*/
 
         var request = new UnityWebRequest(apiURL + "/scrs/geopose_objs_local", "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(finalJson);
@@ -781,12 +789,12 @@ public class ACityAPIDev : MonoBehaviour
         yield return request.SendWebRequest();
         if (request.isNetworkError || request.isHttpError)
         {
-            Debug.Log(request.error); localizationStatus = LocalizationStatus.ServerError;
-
+            Debug.Log(request.error);
+            localizationStatus = LocalizationStatus.ServerError;
         }
         else
         {
-            //  Debug.Log("Finished Uploading Screenshot");
+            //Debug.Log("Finished Uploading Screenshot");
         }
         Debug.Log(request.downloadHandler.text);
         var jsonParse = JSON.Parse(request.downloadHandler.text);
@@ -794,6 +802,7 @@ public class ACityAPIDev : MonoBehaviour
         if (jsonParse["camera"] != null)
         {
             sid = jsonParse["reconstruction_id"];
+            Debug.Log("answer: rec-id:" + sid);
         }
         tempScale3d = 1;
         getJsonCameraObjects(request.downloadHandler.text, true);
@@ -802,15 +811,15 @@ public class ACityAPIDev : MonoBehaviour
     IEnumerator UploadJPGwithGPS(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
     {
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
-        Debug.Log("bytes = " + bytes.Length);
+        Debug.Log("bytes length = " + bytes.Length);
         List<IMultipartFormSection> form = new List<IMultipartFormSection>();
         string rotationDevice = "90";
         if (!editorTestMode)
         {
-            if (Input.deviceOrientation == DeviceOrientation.Portrait) { rotationDevice = "0"; }
-            if (Input.deviceOrientation == DeviceOrientation.LandscapeRight) { rotationDevice = "90"; }
+            if (Input.deviceOrientation == DeviceOrientation.Portrait          ) { rotationDevice =   "0"; }
+            if (Input.deviceOrientation == DeviceOrientation.LandscapeRight    ) { rotationDevice =  "90"; }
             if (Input.deviceOrientation == DeviceOrientation.PortraitUpsideDown) { rotationDevice = "180"; }
-            if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft) { rotationDevice = "270"; }
+            if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft     ) { rotationDevice = "270"; }
         }
 
         string jsona = "{\"gps\":{\"latitude\":" + langitude + ",\"longitude\":" + latitude + ",\"hdop\":" + hdop + "},\"rotation\": " + rotationDevice + ",\"mirrored\": false}";
@@ -821,25 +830,28 @@ public class ACityAPIDev : MonoBehaviour
         byte[] boundary = UnityWebRequest.GenerateBoundary();
         Debug.Log(apiURL + "/api/localizer/localize");
         var w = UnityWebRequest.Post(apiURL + "/api/localizer/localize", form, boundary);
-        w.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");
+      //w.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");  //FixMe: commented in aco3d???
         w.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
-        w.SetRequestHeader("user-agent", "Unity AC-viewer based app, name: " + Application.productName + ", Device: " + SystemInfo.deviceModel);
+        w.SetRequestHeader("user-agent", "Unity AC-Viewer based app, name: " + Application.productName + ", Device: " + SystemInfo.deviceModel);
 
         Debug.Log("Uploading Screenshot started...");
-
+        w.timeout = 50;
         yield return w.SendWebRequest();
-        if (w.isNetworkError || w.isHttpError) { Debug.Log(w.error); localizationStatus = LocalizationStatus.ServerError; }
+        if (w.isNetworkError || w.isHttpError)
+        {
+            Debug.Log(w.error); localizationStatus = LocalizationStatus.ServerError;
+        }
         else
         {
             Debug.Log("Finished Uploading Screenshot");
         }
         Debug.Log(w.downloadHandler.text);
         var jsonParse = JSON.Parse(w.downloadHandler.text);
-         string sid = null;
-         if (jsonParse["camera"] != null)
-         {
-             sid = jsonParse["reconstruction_id"];
-         }
+        string sid = null;
+        if (jsonParse["camera"] != null)
+        {
+            sid = jsonParse["reconstruction_id"];
+        }
         tempScale3d = 1;
 
         getJsonCameraObjects(w.downloadHandler.text, false);
@@ -856,6 +868,7 @@ public class ACityAPIDev : MonoBehaviour
 
     IEnumerator prepareC (float langitude, float latitude, Action<bool, string> getServerAnswer)
     {
+        // Example: http://developer.augmented.city:5000/api/localizer/prepare?lat=59.907458f&lon=30.298400f 
         Debug.Log(apiURL + "/api/localizer/prepare?lat=" + latitude + "f&lon=" + langitude + "f");
         var w = UnityWebRequest.Get(apiURL + "/api/localizer/prepare?lat=" + latitude + "f&lon=" + langitude + "f");
         w.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");
@@ -863,7 +876,6 @@ public class ACityAPIDev : MonoBehaviour
         yield return w.SendWebRequest();
         if (w.isNetworkError || w.isHttpError) { Debug.Log(w.error); localizationStatus = LocalizationStatus.ServerError;
             getServerAnswer(false, w.downloadHandler.text);
-
         }
         else
         {
@@ -877,6 +889,7 @@ public class ACityAPIDev : MonoBehaviour
     IEnumerator Locate(Action<float, float, float, string, Action<string, Transform, StickerInfo[]>> getLocData)
     {
         Debug.Log("Started Locate GPS");
+
         localizationStatus = LocalizationStatus.GetGPSData;
         // First, check if user has location service enabled
         if (!Input.location.isEnabledByUser)
@@ -922,7 +935,7 @@ public class ACityAPIDev : MonoBehaviour
         }
 
         // Stop service if there is no need to query location updates continuously
-        //  Input.location.Stop();
+        //Input.location.Stop();
     }
 
     public LocalizationStatus getLocalizationStatus() { return localizationStatus; }
@@ -959,7 +972,6 @@ public class ACityAPIDev : MonoBehaviour
             SetTimer(timer);
         }
     }
-
 
     public void TimerShow()
     {

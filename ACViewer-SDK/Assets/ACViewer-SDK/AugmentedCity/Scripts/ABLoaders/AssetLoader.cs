@@ -18,8 +18,8 @@ public class AssetLoader : MonoBehaviour
         AssetName = "obj";
         GameObject man = GameObject.FindGameObjectWithTag("Manager");
         modelManager = man.GetComponent<ModelManager>();
+        mover = GetComponent<Mover>();
         StartLoadAB();
-        mover = GetComponent<Mover>();        
     }
 
     public void StartLoadAB()
@@ -55,35 +55,9 @@ public class AssetLoader : MonoBehaviour
     IEnumerator LoadAsset()
     {
         modelManager.loadingBunles.Add(ABName);
-        /*while (!Caching.ready)
-            yield return null;
-
-        WWW www = WWW.LoadFromCacheOrDownload(BundleFullURL + ABName, 1);
-        yield return www;
-
-        if (!string.IsNullOrEmpty(www.error))
-        {
-            preloader.LoadPercent(www);
-            Debug.Log(www.error);
-            yield return null;
-        }
-        AssetBundle bundle = www.assetBundle;
-        if (bundle.Contains(AssetName))
-        {
-            Instantiate(bundle.LoadAssetAsync(AssetName).asset, gameObject.transform);
-            modelManager.bundles.Add(bundle);
-            modelManager.loadingBunles.Remove(ABName);
-            mover.modelName = ABName;
-            Debug.Log("is OBJ");
-            preloader.Loaded();
-        }
-        else
-        {
-            Debug.Log("Check asset name");
-        }*/
 
 #if UNITY_IOS
-        BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/"+ ABName + "/ios/bundle";
+        BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/" + ABName + "/ios/bundle";
 #endif
 #if PLATFORM_ANDROID
         BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/" + ABName + "/android/bundle";
@@ -119,7 +93,7 @@ public class AssetLoader : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("Check asset name");
+                    Debug.Log("Check !loaded asset name: " + AssetName);
                     preloader.CantLoad();
                     preloader.Loaded();
                     GetComponent<Collider>().enabled = false;
