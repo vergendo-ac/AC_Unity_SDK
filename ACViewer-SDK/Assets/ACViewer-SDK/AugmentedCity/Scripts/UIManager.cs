@@ -46,11 +46,6 @@ public class UIManager : MonoBehaviour
         stickerInfoForPanel = null;
         stickerDeActivate = null;
         gloc = 0; bloc = 0;
-        if (PlayerPrefs.HasKey("TimeForRelocation")) { 
-            gph.setTimeForRelocation(PlayerPrefs.GetFloat("TimeForRelocation"));
-            placeholderRelocationTimer.text = "" + PlayerPrefs.GetFloat("TimeForRelocation");
-        }
-        aRcamera = Camera.main.gameObject;
 
         string ver = Application.version;
 
@@ -71,6 +66,18 @@ public class UIManager : MonoBehaviour
             PlayerPrefs.DeleteAll();
             PlayerPrefs.SetString("bver", ver);
         }
+
+        if (PlayerPrefs.HasKey("TimeForRelocation"))
+        {
+            gph.setTimeForRelocation(PlayerPrefs.GetFloat("TimeForRelocation"));
+            placeholderRelocationTimer.text = "" + PlayerPrefs.GetFloat("TimeForRelocation");
+        }
+        else
+        {
+            PlayerPrefs.SetFloat("TimeForRelocation", gph.timeForRelocation);
+        }
+
+        aRcamera = Camera.main.gameObject;
 
         Debug.Log("Version " + Application.version + " bver " + ver);
     }
@@ -251,6 +258,22 @@ public class UIManager : MonoBehaviour
         if (Input.deviceOrientation == DeviceOrientation.Portrait)           { Debug.Log("ScreenOrientation.Portrait");           }
         if (Input.deviceOrientation == DeviceOrientation.PortraitUpsideDown) { Debug.Log("ScreenOrientation.PortraitUpsideDown"); }
         if (Input.deviceOrientation == DeviceOrientation.LandscapeRight)     { Debug.Log("ScreenOrientation.LandscapeRight");     }
+    }
+
+    public void localizationMethodDebug(bool oscp, bool ecef, bool geo)
+    {
+        if (oscp)
+        {
+            if (!ecef && !geo) debugPose[16].text = "OSCP local";
+            if (ecef)          debugPose[16].text = "ECEF";
+            if (geo)           debugPose[16].text = "Geopose";
+        }
+        else debugPose[16].text = "Local";
+    }
+
+    public void statusDebug(string status)
+    {
+        debugPose[13].text = status;
     }
 
 }
