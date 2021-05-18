@@ -9,8 +9,8 @@ using UnityEditor;
 
 public class UIManager : MonoBehaviour
 {
-
     GetPlaceHoldersDev gph;
+
     public Text placeholderRelocationTimer;
     public Text[] debugPose;
 
@@ -42,13 +42,7 @@ public class UIManager : MonoBehaviour
 
     void Start()
     {
-        gph = GetComponent<GetPlaceHoldersDev>();
-        stickerInfoForPanel = null;
-        stickerDeActivate = null;
-        gloc = 0; bloc = 0;
-
         string ver = Application.version;
-
         if (PlayerPrefs.HasKey("bver"))
         {
             if (!(PlayerPrefs.GetString("bver").Equals(ver)))
@@ -67,10 +61,18 @@ public class UIManager : MonoBehaviour
             PlayerPrefs.SetString("bver", ver);
         }
 
+        Debug.Log("Version " + Application.version + " bver " + ver);
+
+        gph = GetComponent<GetPlaceHoldersDev>();
+        stickerInfoForPanel = null;
+        stickerDeActivate = null;
+        gloc = 0; bloc = 0;
+
         if (PlayerPrefs.HasKey("TimeForRelocation"))
         {
-            gph.setTimeForRelocation(PlayerPrefs.GetFloat("TimeForRelocation"));
-            placeholderRelocationTimer.text = "" + PlayerPrefs.GetFloat("TimeForRelocation");
+            float val = PlayerPrefs.GetFloat("TimeForRelocation");
+            gph.setTimeForRelocation(val);
+            placeholderRelocationTimer.text = "" + val;
         }
         else
         {
@@ -78,12 +80,11 @@ public class UIManager : MonoBehaviour
         }
 
         aRcamera = Camera.main.gameObject;
-
-        Debug.Log("Version " + Application.version + " bver " + ver);
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update()
+    {
     }
 
     void OnApplicationPause(bool pauseStatus)
@@ -95,16 +96,16 @@ public class UIManager : MonoBehaviour
     {
         Debug.Log("Reloaded");
         AssetBundle.UnloadAllAssetBundles(true);
-
         SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
-      //Application.LoadLevel("AugCityDebug");
+        //Application.LoadLevel("AugCityDebug");
     }
 
     public void setRelocationTimer(Text tt)
     {
-        placeholderRelocationTimer.text = "" + PlayerPrefs.GetFloat("TimeForRelocation");
-        gph.setTimeForRelocation(float.Parse(tt.text));
-        PlayerPrefs.SetFloat("TimeForRelocation", float.Parse(tt.text));
+        float val = float.Parse(tt.text);
+        PlayerPrefs.SetFloat("TimeForRelocation", val);
+        gph.setTimeForRelocation(val);
+        placeholderRelocationTimer.text = "" + val;
     }
 
     public void setAnimationTimer(Text tt)
@@ -117,13 +118,16 @@ public class UIManager : MonoBehaviour
         videoLookAtUser = vlook;
     }
 
-    public void setSliderOn() {
+    public void setSliderOn()
+    {
         sliderOn = !sliderOn;
     }
 
-    public void SetStickerPanel(ACityAPIDev.StickerInfo sInfo, Action<bool> stDeAct) {
+    public void SetStickerPanel(ACityAPIDev.StickerInfo sInfo, Action<bool> stDeAct)
+    {
         if (stickerDeActivate == null) { stickerDeActivate = stDeAct; }
-        if ((stickerPanel.activeSelf) && sInfo.Equals(stickerInfoForPanel)) {
+        if ((stickerPanel.activeSelf) && sInfo.Equals(stickerInfoForPanel))
+        {
             stickerPanel.SetActive(false);
             stickerDeActivate(false);
         }
@@ -133,7 +137,8 @@ public class UIManager : MonoBehaviour
             stickerPanel.SetActive(true);
             stickerText.text = sInfo.sText;
             stickerType.text = sInfo.sType;
-            if (stickerDeActivate != null) {
+            if (stickerDeActivate != null)
+            {
                 stickerDeActivate(false);
                 stickerDeActivate = stDeAct;
                 stickerDeActivate(true);
@@ -141,22 +146,25 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void GoToStickerSite() {
-        if (stickerInfoForPanel.sPath.Length > 0)
-        {
+    public void GoToStickerSite()
+    {
+        if (stickerInfoForPanel.sPath.Length > 0) {
             Application.OpenURL(stickerInfoForPanel.sPath);
         }
     }
 
-    public void DownSwipe() {
+    public void DownSwipe()
+    {
         stickerPanel.SetActive(false);
-        if (stickerDeActivate != null) stickerDeActivate(false);
+        if (stickerDeActivate != null)
+            stickerDeActivate(false);
     }
 
-    public void Located() {
+    public void Located()
+    {
         setLowPanelButtons(true);
-       // setMenuButtons(true);
-       // setMapButtons(true);
+        //setMenuButtons(true);
+        //setMapButtons(true);
         setLocalizeProgress(false);
         setColorCenterImage();
     }
@@ -183,7 +191,8 @@ public class UIManager : MonoBehaviour
         loclizeProgress.SetActive(act);
     }
 
-    public void setColorCenterImage() {
+    public void setColorCenterImage()
+    {
         centerImage.GetComponent<Image>().color = Color.yellow;
     }
 
@@ -193,7 +202,8 @@ public class UIManager : MonoBehaviour
         PlayerPrefs.SetString("ApiUrl", tt.text);
     }
 
-    public void CreateNewObject() {
+    public void CreateNewObject()
+    {
         GameObject go = new GameObject("temp");
         go.transform.position = aRcamera.transform.position;
         go.transform.Translate(aRcamera.transform.forward*3);
@@ -204,7 +214,8 @@ public class UIManager : MonoBehaviour
     public void AddToReco() {
     }
 
-    public void setDebugPose(float xc, float yc, float zc, float xo, float yo, float zo, float wo, string recoId) {
+    public void setDebugPose(float xc, float yc, float zc, float xo, float yo, float zo, float wo, string recoId)
+    {
         if (xc != 0)
         {
             debugPose[0].text = "xc = " + xc;
@@ -216,7 +227,8 @@ public class UIManager : MonoBehaviour
             debugPose[6].text = "wo = " + wo;
             gloc++;
         }
-        else {
+        else
+        {
             debugPose[0].text = "Cant Localize ";
             debugPose[1].text = "yc = " + 0;
             debugPose[2].text = "zc = " + 0;
@@ -238,26 +250,14 @@ public class UIManager : MonoBehaviour
         debugPose[14].text = "hdop= " + hdop;
     }
 
-    public void planeDebug(float yplane) {
+    public void planeDebug(float yplane)
+    {
         debugPose[12].text = "PlaneUnderCam: " + (aRcamera.transform.position.y - yplane);
     }
 
-    public void ClearCash() {
-        UnityWebRequest.ClearCookieCache();
-        Caching.ClearCache();
-    }
-
-    public void DemoModeOff(bool mode) {
-        menuButtons.SetActive(mode);
-        lowPanelButtons.SetActive(mode);
-    }
-
-    public void Orient()
+    public void statusDebug(string status)
     {
-        if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft)      { Debug.Log("ScreenOrientation.LandscapeLeft");      }
-        if (Input.deviceOrientation == DeviceOrientation.Portrait)           { Debug.Log("ScreenOrientation.Portrait");           }
-        if (Input.deviceOrientation == DeviceOrientation.PortraitUpsideDown) { Debug.Log("ScreenOrientation.PortraitUpsideDown"); }
-        if (Input.deviceOrientation == DeviceOrientation.LandscapeRight)     { Debug.Log("ScreenOrientation.LandscapeRight");     }
+        debugPose[13].text = status;
     }
 
     public void localizationMethodDebug(bool oscp, bool ecef, bool geo)
@@ -271,9 +271,32 @@ public class UIManager : MonoBehaviour
         else debugPose[16].text = "Local";
     }
 
-    public void statusDebug(string status)
+    public void ClearCash()
     {
-        debugPose[13].text = status;
+        UnityWebRequest.ClearCookieCache();
+        Caching.ClearCache();
+    }
+
+    public void DemoModeOff(bool mode)
+    {
+        menuButtons.SetActive(mode);
+        lowPanelButtons.SetActive(mode);
+    }
+
+    public void Orient()
+    {
+        if (Input.deviceOrientation == DeviceOrientation.LandscapeLeft)      { Debug.Log("ScreenOrientation.LandscapeLeft");      }
+        if (Input.deviceOrientation == DeviceOrientation.Portrait)           { Debug.Log("ScreenOrientation.Portrait");           }
+        if (Input.deviceOrientation == DeviceOrientation.PortraitUpsideDown) { Debug.Log("ScreenOrientation.PortraitUpsideDown"); }
+        if (Input.deviceOrientation == DeviceOrientation.LandscapeRight)     { Debug.Log("ScreenOrientation.LandscapeRight");     }
+    }
+
+    public void DebugSet(bool onoff)
+    {
+        if (onoff)
+            PlayerPrefs.SetInt("debug", 1);
+        else
+            PlayerPrefs.SetInt("debug", 0);
     }
 
 }
