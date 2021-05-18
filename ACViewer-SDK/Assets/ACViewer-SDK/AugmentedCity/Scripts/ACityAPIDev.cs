@@ -16,14 +16,13 @@ using System.Text;
 
 public class ACityAPIDev : MonoBehaviour
 {
-
-    public class UnityPose
+    public class UnityPose  // class to keep pose of the camera or objects for usage in Unity with left-handed system coords
     {
         public Vector3    pos;
         public Quaternion ori;
 
 
-        public UnityPose(Vector3 acpos, Quaternion acori) // convert right-handed to left-handed system coords for Unity, by redirecting axis Y
+        public UnityPose(Vector3 acpos, Quaternion acori) // convert right-handed to left-handed, by redirecting axis Y
         {
             pos = GetPosition(acpos.x, acpos.y, acpos.z);
             ori = Quaternion.Euler(-acori.eulerAngles.x, acori.eulerAngles.y, -acori.eulerAngles.z);
@@ -56,8 +55,8 @@ public class ACityAPIDev : MonoBehaviour
         }
     }
 
-
-    public class RecoInfo {
+    public class RecoInfo
+    {
         public string id;
         public float scale3dcloud;
         public Vector3 lastCamCoordinate;
@@ -66,7 +65,8 @@ public class ACityAPIDev : MonoBehaviour
         public GeoPose  zeroCamGeoPose;
     }
 
-    public class StickerInfo {
+    public class StickerInfo
+    {
         public Vector3 mainPositions;
         public Vector4 orientations;
 
@@ -124,8 +124,9 @@ public class ACityAPIDev : MonoBehaviour
     public string ServerAPI = "http://developer.augmented.city";
     public GameObject devButton;
 
-
     public TextAsset bb;
+    public string rotationDevice = "90";
+
     Vector3 cameraRotationInLocalization;
     Vector3 cameraPositionInLocalization;
     float cameraDistance;
@@ -143,7 +144,6 @@ public class ACityAPIDev : MonoBehaviour
     const double b = 6356752.3142;
     const double f = (a - b) / a;
     const double e_sq = f * (2 - f);
-
 
     GameObject ARCamera;
     ARCameraManager m_CameraManager;
@@ -179,10 +179,15 @@ public class ACityAPIDev : MonoBehaviour
 #if UNITY_EDITOR 
         editorTestMode = true;
         devButton.SetActive(true);
+        AudioListener.volume = 0;
 #endif
         StartCoroutine(GetTimerC());
         Input.location.Start();
         uim = this.GetComponent<UIManager>();
+        NetworkReachability nr = Application.internetReachability;
+        if (nr == NetworkReachability.NotReachable                  ) uim.statusDebug("No internet");
+        if (nr == NetworkReachability.ReachableViaCarrierDataNetwork) uim.statusDebug("Mobile internet");
+        if (nr == NetworkReachability.ReachableViaLocalAreaNetwork  ) uim.statusDebug("Wifi");
     }
 
     public void SetOSCPusage(bool os)
@@ -205,6 +210,7 @@ public class ACityAPIDev : MonoBehaviour
     {
         if (!PlayerPrefs.HasKey("config"))
         {
+            uim.statusDebug("Set cam frame");
             int needConfigurationNumber = 0;
 #if UNITY_IOS
             using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
@@ -250,6 +256,7 @@ public class ACityAPIDev : MonoBehaviour
 
     public unsafe byte[] CamGetFrame()
     {
+        uim.statusDebug("Get cam frame");
         XRCpuImage image;
         if (m_CameraManager.TryAcquireLatestCpuImage(out image))
         {
@@ -372,7 +379,7 @@ public class ACityAPIDev : MonoBehaviour
                             currentRi.stickerArray[j].orientations  = uPose.GetOrientation();
 
                             stickers[j].mainPositions = currentRi.stickerArray[j].mainPositions;
-                            stickers[j].orientations = currentRi.stickerArray[j].orientations;
+                            stickers[j].orientations  = currentRi.stickerArray[j].orientations;
 
                             for (int i = 0; i < 4; i++)
                             {
@@ -450,8 +457,9 @@ public class ACityAPIDev : MonoBehaviour
                             }
                         }
                         recoList.Add(currentRi);
-                        newCam.transform.position = cameraPositionInLocalization;
+                        newCam.transform.position    = cameraPositionInLocalization;
                         newCam.transform.eulerAngles = cameraRotationInLocalization;
+
                         for (int j = 0; j < objectsAmount; j++)
                         {
                             stickers[j].positions = new Vector3[4];
@@ -840,6 +848,7 @@ public class ACityAPIDev : MonoBehaviour
                     }
                     newCam.transform.position    = cameraPositionInLocalization;
                     newCam.transform.eulerAngles = cameraRotationInLocalization;
+
                     for (int j = 0; j < savedNodeLentgh; j++)
                     {
                         stickers[j].positions = new Vector3[4];
@@ -929,8 +938,8 @@ public class ACityAPIDev : MonoBehaviour
         {
             foreach (RecoInfo ri in recoList)
             {
-                Debug.Log(ri.id);
-                Debug.Log(newId);
+                //Debug.Log(ri.id);
+                //Debug.Log(newId);
                 if (ri.id.Contains(newId)) {
                     rinfo = ri;
                 }
@@ -953,7 +962,7 @@ public class ACityAPIDev : MonoBehaviour
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
         //  byte[] bytes = File.ReadAllBytes(filePath);
         Debug.Log("bytes length = " + bytes.Length);
-        string rotationDevice = "0";
+        rotationDevice = "90";
         if (!editorTestMode)
         {
             rotationDevice = "270";  // Default value
@@ -969,6 +978,7 @@ public class ACityAPIDev : MonoBehaviour
         Debug.Log(apiURL + "/scrs/geopose_objs_local");
 
         var request = new UnityWebRequest(apiURL + "/scrs/geopose_objs_local", "POST");
+      //var request = new UnityWebRequest(apiURL + "/scrs/geopose_objs", "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(finalJson);
         request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
@@ -976,6 +986,7 @@ public class ACityAPIDev : MonoBehaviour
         request.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
         request.SetRequestHeader("Content-Type", "application/json");
         request.uploadHandler.contentType = "application/json";
+        uim.statusDebug("Waiting response");
         request.timeout = 50;
         yield return request.SendWebRequest();
         if (request.isNetworkError || request.isHttpError)
@@ -1004,7 +1015,7 @@ public class ACityAPIDev : MonoBehaviour
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
         Debug.Log("bytes length = " + bytes.Length);
         List<IMultipartFormSection> form = new List<IMultipartFormSection>();
-        string rotationDevice = "0";
+        rotationDevice = "90";
         if (!editorTestMode)
         {
             rotationDevice = "270";  // Default value
@@ -1023,7 +1034,8 @@ public class ACityAPIDev : MonoBehaviour
         w.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
         w.SetRequestHeader("user-agent", "Unity AC-Viewer based app, name: " + Application.productName + ", Device: " + SystemInfo.deviceModel);
 
-        Debug.Log("Uploading Screenshot started...");
+        //Debug.Log("Uploading Screenshot started...");
+        uim.statusDebug("Waiting response");
         w.timeout = 50;
         yield return w.SendWebRequest();
         if (w.isNetworkError || w.isHttpError)
@@ -1032,7 +1044,7 @@ public class ACityAPIDev : MonoBehaviour
         }
         else
         {
-            Debug.Log("Finished Uploading Screenshot");
+            //Debug.Log("Finished Uploading Screenshot");
         }
         Debug.Log(w.downloadHandler.text);
         var jsonParse = JSON.Parse(w.downloadHandler.text);
@@ -1079,6 +1091,7 @@ public class ACityAPIDev : MonoBehaviour
     IEnumerator Locate(Action<float, float, float, string, Action<string, Transform, StickerInfo[]>> getLocData)
     {
         Debug.Log("Started Locate GPS");
+        uim.statusDebug("Locate GPS");
 
         localizationStatus = LocalizationStatus.GetGPSData;
         // First, check if user has location service enabled
@@ -1122,6 +1135,7 @@ public class ACityAPIDev : MonoBehaviour
             longitude  = Input.location.lastData.longitude;
             latitude   = Input.location.lastData.latitude;
             hdop       = Input.location.lastData.horizontalAccuracy;
+            uim.statusDebug("Located GPS");
         }
 
         // Stop service if there is no need to query location updates continuously
@@ -1134,9 +1148,11 @@ public class ACityAPIDev : MonoBehaviour
     }
 
 
-    void FixedUpdate() { 
+    void FixedUpdate()
+    {
         globalTimer = serverTimer + Time.timeSinceLevelLoad;
     }
+
     void SetTimer(double timer)
     {
         Debug.Log("(float)timer  % 100000= " + (float)(timer % 100000));
@@ -1174,7 +1190,7 @@ public class ACityAPIDev : MonoBehaviour
     {
         double lamb, phi, s, N;
         lamb = lat * Mathf.Deg2Rad;
-        phi = lon * Mathf.Deg2Rad;
+        phi  = lon * Mathf.Deg2Rad;
         s = Math.Sin(lamb);
         N = a / Math.Sqrt(1 - e_sq * s * s);
 
@@ -1200,7 +1216,7 @@ public class ACityAPIDev : MonoBehaviour
     {
         double lamb, phi, s, N;
         lamb = lat_ref * Mathf.Deg2Rad;
-        phi = lon_ref * Mathf.Deg2Rad;
+        phi  = lon_ref * Mathf.Deg2Rad;
         s = Math.Sin(lamb);
         N = a / Math.Sqrt(1 - e_sq * s * s);
 
@@ -1224,11 +1240,11 @@ public class ACityAPIDev : MonoBehaviour
         Debug.Log("xd= " + xd + ", yd = " + yd + ",zd = " + zd);
 
         double xEast, yNorth, zUp;
-        xEast = -sin_phi * xd + cos_phi * yd;
+        xEast  = -sin_phi * xd + cos_phi * yd;
         yNorth = -cos_phi * sin_lambda * xd - sin_lambda * sin_phi * yd + cos_lambda * zd;
-        zUp = cos_lambda * cos_phi * xd + cos_lambda * sin_phi * yd + sin_lambda * zd;
+        zUp    =  cos_lambda * cos_phi * xd + cos_lambda * sin_phi * yd + sin_lambda * zd;
 
-        Debug.Log("xEast = " + xEast + ",yNorth " + yNorth + ",zUp" + zUp);
+        //Debug.Log("xEast = "+ xEast + ",yNorth " + yNorth+ ",zUp" + zUp);
 
         return new Vector3((float)xEast, (float)yNorth, (float)zUp);
     }
