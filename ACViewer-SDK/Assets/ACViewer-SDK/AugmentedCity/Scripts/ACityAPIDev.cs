@@ -160,7 +160,7 @@ public class ACityAPIDev : MonoBehaviour
     void Start()
     {
         // PlayerPrefs.DeleteAll();
-        //UnityWebRequest.ClearCookieCache(); //FixMe: aco3d has it?
+        UnityWebRequest.ClearCookieCache();
         globalTimer = -1;
         ARCamera = Camera.main.gameObject;
         m_CameraManager = Camera.main.GetComponent<ARCameraManager>();
@@ -216,15 +216,15 @@ public class ACityAPIDev : MonoBehaviour
             using (var configurations = m_CameraManager.GetConfigurations(Allocator.Temp))
             {
                 Debug.Log("configurations.Length = " + configurations.Length);
-                needConfigurationNumber = 0;
+                needConfigurationNumber = 0;  // iOS's list has high resolutions first coming, get first in fail case
                 for (int i = 0; i < configurations.Length; i++)
                 {
-                    Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
-                    if (configurations[i].height == 1080) { needConfigurationNumber = i; }
+                    Debug.Log("Conf: h=" + configurations[i].height + " w=" + configurations[i].width + " fr:" + configurations[i].framerate);
+                    if (configurations[i].height == 1080) { needConfigurationNumber = i; }  // store the minimal resolution with the required height
                 }
                 Debug.Log("Config number: " + needConfigurationNumber);
                 // Get that configuration by index
-                var configuration = configurations[needConfigurationNumber];   
+                var configuration = configurations[needConfigurationNumber];
                 // Make it the active one
                 m_CameraManager.currentConfiguration = configuration;
             }
@@ -234,11 +234,11 @@ public class ACityAPIDev : MonoBehaviour
             {
                 Debug.Log("configurations.Length = " + configurations.Length);
                 bool needConfFound = false;
-                needConfigurationNumber = configurations.Length - 1;
+                needConfigurationNumber = configurations.Length - 1;  // Android's list has high resolutions last coming, get last in fail case
                 for (int i = 0; i < configurations.Length; i++)
                 {
-                    Debug.Log("Conf.height = " + configurations[i].height + ";  Conf.width = " + configurations[i].width + ";  conf.framerate = " + configurations[i].framerate);
-                    if ((configurations[i].height == 1080) && (!needConfFound)) {
+                    Debug.Log("Conf: h=" + configurations[i].height + " w=" + configurations[i].width + " fr=" + configurations[i].framerate);
+                    if ((configurations[i].height == 1080) && (!needConfFound)) {  // detect first low resolution with the required height
                         needConfigurationNumber = i; needConfFound = true;
                     }
                 }
@@ -314,7 +314,8 @@ public class ACityAPIDev : MonoBehaviour
     {
         var jsonParse = JSON.Parse(jsonanswer);
         float px, py, pz, ox, oy, oz, ow;
-        int objectsAmount = -1; string js, sessionId;
+        int objectsAmount = -1;
+        string js, sessionId;
 
         if (!geopose)
         {
@@ -329,7 +330,7 @@ public class ACityAPIDev : MonoBehaviour
                     // Debug.Log("js node [" + objectsAmount + "]  - " + js);
                 } while (js != null);
 
-                Debug.Log("nodeAmount =   " + objectsAmount + ", RecoArray Length = " + recoList.Count);
+                Debug.Log("nodeAmount = " + objectsAmount + ", recoArray.Len = " + recoList.Count);
 
                 px = jsonParse["camera"]["pose"]["position"]["x"].AsFloat;
                 py = jsonParse["camera"]["pose"]["position"]["y"].AsFloat;
@@ -547,7 +548,7 @@ public class ACityAPIDev : MonoBehaviour
                     //Debug.Log("js node [" + objectsAmount + "] - " + js);
                 } while (js != null);
 
-                Debug.Log("nodeAmount =   " + objectsAmount + ", RecoArray Length = " + recoList.Count);
+                Debug.Log("nodeAmount = " + objectsAmount + ", recoArray.Len = " + recoList.Count);
                 double camLat = 0, camLon = 0, camHei = 0;
                 double px0 = 0, py0 = 0, pz0 = 0;
                 px = 0; py = 0; pz = 0; // reset position initially
@@ -861,7 +862,7 @@ public class ACityAPIDev : MonoBehaviour
 
                 if (zeroCoord.transform.eulerAngles == Vector3.zero)
                 {
-                    newCam.transform.position = cameraPositionInLocalization;
+                    newCam.transform.position    = cameraPositionInLocalization;
                     newCam.transform.eulerAngles = cameraRotationInLocalization;
                 }
                 currentRi.lastCamCoordinate = new Vector3(px, py, pz);
@@ -977,6 +978,8 @@ public class ACityAPIDev : MonoBehaviour
         Debug.Log("finalJson OSCP = " + finalJson);
         Debug.Log(apiURL + "/scrs/geopose_objs_local");
 
+        uim.gpsDebug(langitude, latitude, hdop);
+
         var request = new UnityWebRequest(apiURL + "/scrs/geopose_objs_local", "POST");
       //var request = new UnityWebRequest(apiURL + "/scrs/geopose_objs", "POST");
         byte[] bodyRaw = Encoding.UTF8.GetBytes(finalJson);
@@ -1091,7 +1094,7 @@ public class ACityAPIDev : MonoBehaviour
     IEnumerator Locate(Action<float, float, float, string, Action<string, Transform, StickerInfo[]>> getLocData)
     {
         Debug.Log("Started Locate GPS");
-        uim.statusDebug("Locate GPS");
+        uim.statusDebug("Locating GPS");
 
         localizationStatus = LocalizationStatus.GetGPSData;
         // First, check if user has location service enabled
@@ -1102,7 +1105,7 @@ public class ACityAPIDev : MonoBehaviour
         }
         // Start service before querying location
         Input.location.Start();
-        // Wait until service initializes
+        // Wait until service is initializing
         int maxWait = 20;
         while (Input.location.status == LocationServiceStatus.Initializing && maxWait > 0)
         {
@@ -1110,7 +1113,7 @@ public class ACityAPIDev : MonoBehaviour
             maxWait--;
         }
 
-        // Service didn't initialize in 20 seconds
+        // Service hasn't initialized for 20 seconds
         if (maxWait < 1)
         {
             Debug.Log("Timed out");
@@ -1129,7 +1132,11 @@ public class ACityAPIDev : MonoBehaviour
         else
         {
             // Access granted and location value could be retrieved
-            Debug.Log("Location: " + Input.location.lastData.latitude + " " + Input.location.lastData.longitude + " " + Input.location.lastData.altitude + " " + Input.location.lastData.horizontalAccuracy + " " + Input.location.lastData.timestamp);
+            Debug.Log("Location: " + Input.location.lastData.latitude + " "
+                                   + Input.location.lastData.longitude + " "
+                                   + Input.location.lastData.altitude + " "
+                                   + Input.location.lastData.horizontalAccuracy + " "
+                                   + Input.location.lastData.timestamp);
             getLocData(Input.location.lastData.latitude, Input.location.lastData.longitude, Input.location.lastData.horizontalAccuracy, null, null);
             GPSlocation = true;
             longitude  = Input.location.lastData.longitude;
@@ -1163,7 +1170,7 @@ public class ACityAPIDev : MonoBehaviour
 
     IEnumerator GetTimerC()
     {
-        var sw = UnityWebRequest.Get("http://developer.augmented.city:15000/api/v2/server_timestamp");
+        var sw = UnityWebRequest.Get("http://developer.augmented.city/api/v2/server_timestamp");
         yield return sw.SendWebRequest();
         if (sw.isNetworkError || sw.isHttpError)
         {

@@ -56,7 +56,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
         relocationCompleted = true;
         toShowStickers = true;
         uim = this.GetComponent<UIManager>();
-        acapi.prepareSession(preparationCheck); //FixMe: in aco3d it's off
+        //acapi.prepareSession(preparationCheck);
     }
 
     public void setTimeForRelocation(float tfr) {
@@ -77,7 +77,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
     {
         if (acapi.editorTestMode) {
             timeForRelocation = 200f;
-            PlayerPrefs.SetFloat("TimeForRelocation", 200f);
+            PlayerPrefs.SetFloat("TimeForRelocation", timeForRelocation);
         }
         pastArCamCoordinates = arCamCoordinates;
         arCamCoordinates = new Vector3(aRcamera.transform.position.x, aRcamera.transform.position.y, aRcamera.transform.position.z);
@@ -204,12 +204,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 VideoPlayer vidos = urlVid.GetComponentInChildren<VideoPlayer>();
                                 vidos.source = VideoSource.Url;
                                 vidos.url = stickers[j].sPath;
-#if PLATFORM_ANDROID                                                    //FixMe: waits AC cert fix
-                                vidos.url = vidos.url.Replace("https://developer.augmented.city",
-                                                               "http://developer.augmented.city");
-#endif
-
-                                Debug.Log("VID URL = " + vidos.url);
+//#if PLATFORM_ANDROID                                                    //FixMe: waits AC cert fix
+//                                vidos.url = vidos.url.Replace("https://developer.augmented.city",
+//                                                               "http://developer.augmented.city");
+//#endif
+//                                Debug.Log("VID URL = " + vidos.url);
                                 videoURLs.Add(urlVid);
                             }
                             else if (is3dModel || is3dModelTransfer)    // 3d object or special navi object

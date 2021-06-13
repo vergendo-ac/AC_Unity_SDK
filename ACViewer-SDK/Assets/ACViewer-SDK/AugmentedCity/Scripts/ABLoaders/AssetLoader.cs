@@ -62,7 +62,7 @@ public class AssetLoader : MonoBehaviour
 #if PLATFORM_ANDROID
         BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/" + ABName + "/android/bundle";
 #endif
-        Debug.Log("Load Bundle Path = " + BundleFullURL);
+        Debug.Log("Load bundle by: " + BundleFullURL);
 
         CachedAssetBundle cab = new CachedAssetBundle(ABName, new Hash128(0,0));
         using (UnityWebRequest uwr = UnityWebRequestAssetBundle.GetAssetBundle(BundleFullURL, cab))
