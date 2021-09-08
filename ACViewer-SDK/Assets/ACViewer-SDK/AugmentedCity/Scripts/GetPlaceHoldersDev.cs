@@ -204,75 +204,81 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 VideoPlayer vidos = urlVid.GetComponentInChildren<VideoPlayer>();
                                 vidos.source = VideoSource.Url;
                                 vidos.url = stickers[j].sPath;
-//#if PLATFORM_ANDROID                                                    //FixMe: waits AC cert fix
-//                                vidos.url = vidos.url.Replace("https://developer.augmented.city",
-//                                                               "http://developer.augmented.city");
-//#endif
+#if PLATFORM_ANDROID                                                    //FixMe: waits AC cert fix
+                                vidos.url = vidos.url.Replace("https://developer.augmented.city",
+                                                               "http://developer.augmented.city");
+#endif
 //                                Debug.Log("VID URL = " + vidos.url);
                                 videoURLs.Add(urlVid);
                             }
-                            else if (is3dModel || is3dModelTransfer)    // 3d object or special navi object
+                            else if ((is3dModel || is3dModelTransfer))    // 3d object or special navi object
                             {
-                                GameObject model = Instantiate(GetComponent<ModelManager>().ABloader, placeHolderParent.transform);
-                                string bundleName = stickers[j].sText.ToLower();
-                                if (stickers[j].type.ToLower().Contains("3d"))      // is it new format
+                                if (!stickers[j].sText.ToLower().Contains("navgard"))
                                 {
-                                    bundleName = stickers[j].bundleName.ToLower();
-                                    if (string.IsNullOrEmpty(bundleName)) {
-                                        bundleName = stickers[j].sText.ToLower();  // return back to default bundle name as the 'name'
+                                    GameObject model = Instantiate(GetComponent<ModelManager>().ABloader, placeHolderParent.transform);
+                                    string bundleName = stickers[j].sText.ToLower();
+                                    if (stickers[j].type.ToLower().Contains("3d"))      // is it new format
+                                    {
+                                        bundleName = stickers[j].bundleName.ToLower();
+                                        if (string.IsNullOrEmpty(bundleName))
+                                        {
+                                            bundleName = stickers[j].sText.ToLower();  // return back to default bundle name as the 'name'
+                                        }
                                     }
+                                    model.GetComponent<AssetLoader>().ABName = bundleName;
+                                    model.transform.localPosition = stickers[j].mainPositions; // * acapi.tempScale3d;
+                                    model.transform.localRotation = new Quaternion(
+                                        stickers[j].orientations.x,
+                                        stickers[j].orientations.y,
+                                        stickers[j].orientations.z,
+                                        stickers[j].orientations.w);
+
+                                    if (stickers[j].sTrajectoryPath.Length > 1)
+                                    {
+                                        Trajectory tr = model.GetComponent<Trajectory>();
+                                        tr.go = true;
+                                        tr.acapi = acapi;
+                                        tr.sTrajectory = stickers[j].sTrajectoryPath;
+                                        tr.sTimePeriod = stickers[j].sTrajectoryPeriod;
+                                        tr.sOffset = stickers[j].sTrajectoryOffset;
+                                    }
+
+                                    //Debug.Log(stickers[j].sTrajectoryPath);
+
+                                    // TEMP
+                                    Mover mover = model.GetComponent<Mover>();
+                                    mover.setLocked(true);
+                                    mover.objectId = stickers[j].objectId;
+
+                                    if (!stickers[j].vertical ||
+                                        bundleName.Contains("nograv"))
+                                    {
+                                        mover.noGravity = true;
+                                    }
+
+                                    if (stickers[j].grounded ||
+                                        bundleName.Contains("quar") ||
+                                        bundleName.Contains("santa") ||
+                                        bundleName.Contains("pavel") ||
+                                        bundleName.Contains("gard"))
+                                    {
+                                        mover.landed = true;
+                                    }
+
+
+                                    /*Debug.Log(j + ". 3dmodel " + stickers[j].sText
+                                        + " = " + model.transform.localPosition
+                                        + " model.rot = " + model.transform.localRotation
+                                        + " stick.ori = " + stickers[j].orientations);*/
+
+                                    if (stickers[j].SModel_scale.Length > 0)
+                                    {
+                                        float scale = float.Parse(stickers[j].SModel_scale);
+                                        model.transform.localScale = new Vector3(scale, scale, scale);
+                                    }
+
+                                    models.Add(model);                      // store the new just created model
                                 }
-                                model.GetComponent<AssetLoader>().ABName = bundleName;
-                                model.transform.localPosition = stickers[j].mainPositions; // * acapi.tempScale3d;
-                                model.transform.localRotation = new Quaternion(
-                                    stickers[j].orientations.x,
-                                    stickers[j].orientations.y,
-                                    stickers[j].orientations.z,
-                                    stickers[j].orientations.w);
-
-                                if (stickers[j].sTrajectoryPath.Length > 1)
-                                {
-                                    Trajectory tr = model.GetComponent<Trajectory>();
-                                    tr.go = true;
-                                    tr.acapi = acapi;
-                                    tr.sTrajectory = stickers[j].sTrajectoryPath;
-                                    tr.sTimePeriod = stickers[j].sTrajectoryPeriod;
-                                    tr.sOffset = stickers[j].sTrajectoryOffset;
-                                }
-
-                                //Debug.Log(stickers[j].sTrajectoryPath);
-
-                                // TEMP
-                                Mover mover = model.GetComponent<Mover>();
-                                mover.setLocked(true);
-                                mover.objectId = stickers[j].objectId;
-
-                                if (!stickers[j].vertical ||
-                                    bundleName.Contains("nograv")) {
-                                    mover.noGravity = true;
-                                }
-
-                                if (stickers[j].grounded ||
-                                    bundleName.Contains("quar") ||
-                                    bundleName.Contains("santa") ||
-                                    bundleName.Contains("pavel") ||
-                                    bundleName.Contains("gard"))
-                                {
-                                    mover.landed = true;
-                                }
-
-
-                                /*Debug.Log(j + ". 3dmodel " + stickers[j].sText
-                                    + " = " + model.transform.localPosition
-                                    + " model.rot = " + model.transform.localRotation
-                                    + " stick.ori = " + stickers[j].orientations);*/
-
-                                if (stickers[j].SModel_scale.Length > 0) {
-                                    float scale = float.Parse(stickers[j].SModel_scale);
-                                    model.transform.localScale = new Vector3(scale, scale, scale);
-                                }
-
-                                models.Add(model);                      // store the new just created model
                             }
                             else                                        // other types of objects - info-stickers
                             {

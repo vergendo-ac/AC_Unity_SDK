@@ -8265,7 +8265,7 @@ MonoBehaviour:
   stickerShop: {fileID: 398534618485552298, guid: aedd8cf299590b842b93aca8fc49588e,
     type: 3}
   devCamMat: {fileID: 2100000, guid: fa96db4abc91d294f97a681e6cf300ac, type: 2}
-  devImagePath: D:/camtemp/h1.jpg
+  devImagePath: D:/camtemp/hk1.jpg
   needScaling: 0
   timeForRelocation: 2
 --- !u!4 &1396039690

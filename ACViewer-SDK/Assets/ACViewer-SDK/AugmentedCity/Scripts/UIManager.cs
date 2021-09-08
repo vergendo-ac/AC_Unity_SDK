@@ -58,6 +58,7 @@ public class UIManager : MonoBehaviour
             UnityWebRequest.ClearCookieCache();
             Caching.ClearCache();
             PlayerPrefs.DeleteAll();
+            PlayerPrefs.SetString("ApiUrl", "http://developer.augmented.city");
             PlayerPrefs.SetString("bver", ver);
         }
 
@@ -275,6 +276,7 @@ public class UIManager : MonoBehaviour
     {
         UnityWebRequest.ClearCookieCache();
         Caching.ClearCache();
+
     }
 
     public void DemoModeOff(bool mode)

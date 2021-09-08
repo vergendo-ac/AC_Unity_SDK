@@ -132,7 +132,7 @@ public class VideoController : MonoBehaviour
 
     public void Play()
     {
-        Debug.Log("Pressed 'Play'");
+        Debug.Log("Pressed 'Play', URL = " + videoPlayer.url);
         pausedByHand = false;
         videoPlayer.Play();
         ToggleButton(false);
