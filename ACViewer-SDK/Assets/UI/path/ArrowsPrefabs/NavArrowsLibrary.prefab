@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &137447796122235725
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 137447796122235727}
+  - component: {fileID: 137447796122235726}
+  m_Layer: 0
+  m_Name: NavArrowsLibrary
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &137447796122235727
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137447796122235725}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &137447796122235726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137447796122235725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea52789fccf6d2a4ead22b023f374b9f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Arrows:
+  - prefab: {fileID: 1128762495096516366, guid: de955594387aec54080cd888f2a2db25,
+      type: 3}
+    icon: {fileID: 21300000, guid: c8ffd2d4ecd6e3044a9df4353ec0ea6a, type: 3}
+    arrowId: DoubleArrow
+  - prefab: {fileID: 7888064195029796822, guid: 4ff33ac312bbe534eaf22e2ae933bdeb,
+      type: 3}
+    icon: {fileID: 21300000, guid: c08132975e7040a4885551bd3a93b8a2, type: 3}
+    arrowId: FatArrow
+  - prefab: {fileID: 9136878136087366091, guid: e6fe2380159021c45a2b34e9272f9500,
+      type: 3}
+    icon: {fileID: 21300000, guid: b460ab74e9d004b42b551cab0a95cf66, type: 3}
+    arrowId: FootstepArrow
+  - prefab: {fileID: 2145523541060661713, guid: a9257fed920a1fd47a01f979bab017f9,
+      type: 3}
+    icon: {fileID: 21300000, guid: 1690aaaac20232f449168f4a58101322, type: 3}
+    arrowId: OneCornerArrow
+  - prefab: {fileID: 4289293574345473858, guid: 23f25956f378b094e854b45df36cb578,
+      type: 3}
+    icon: {fileID: 21300000, guid: 897daf146a870e740b3c5d063c0ebce8, type: 3}
+    arrowId: PawArrow
+  - prefab: {fileID: 9136878136087366091, guid: f5ec71ca8434e9f46a312129fb64bbcb,
+      type: 3}
+    icon: {fileID: 21300000, guid: 296c613fa7562b54eaeec58b82f55043, type: 3}
+    arrowId: RightArrow
+  - prefab: {fileID: 9136878136087366091, guid: 689e8b2c3c90c454ea5c58944a320b8c,
+      type: 3}
+    icon: {fileID: 21300000, guid: e1e62d8e5ff2a1340953ed77bcd54821, type: 3}
+    arrowId: TripleArrow
+  - prefab: {fileID: 8991471059882956496, guid: c7f73cf02e2d4ca4db03531052a0e38f,
+      type: 3}
+    icon: {fileID: 21300000, guid: 0787358aad299ce438f55dc79f0638e2, type: 3}
+    arrowId: PathPart2
+  DefaultArrow: PathPart2
