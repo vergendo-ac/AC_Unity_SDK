@@ -588,6 +588,7 @@ public class ACityAPIDev : MonoBehaviour
                 px = 0; py = 0; pz = 0; // reset position initially
                 EcefPose zeroEcefCam = new EcefPose();
                 GeoPose  zeroGeoCam  = new GeoPose();
+                bool newGeoPose = false;  // flag whether we use geopose standard 1.0 with fields lat/lon/h at the position section
 
                 RecoInfo currentRi = checkRecoID(sessionId);
                 if (currentRi != null)
@@ -623,10 +624,23 @@ public class ACityAPIDev : MonoBehaviour
                 }
                 else if (useGeopose)
                 {
-                    camLat = jsonParse["geopose"]["pose"]["latitude"].AsDouble;
-                    camLon = jsonParse["geopose"]["pose"]["longitude"].AsDouble;
-                    camHei = jsonParse["geopose"]["pose"]["ellipsoidHeight"].AsDouble;
-                    Debug.Log("Cam GEO - lat = " + camLat + ", lon = " + camLon + ", h = " + camHei);
+                    string checkNewGeo = jsonParse["geopose"]["geopose"]["position"]["lat"];
+                    if (!string.IsNullOrEmpty(checkNewGeo)) { newGeoPose = true; }
+                    if (newGeoPose)
+                    {
+                        camLat = jsonParse["geopose"]["geopose"]["position"]["lat"].AsDouble;
+                        camLon = jsonParse["geopose"]["geopose"]["position"]["lon"].AsDouble;
+                        camHei = jsonParse["geopose"]["geopose"]["position"]["h"].AsDouble;
+                        Debug.Log("Cam GEO_v10 - lat = " + camLat + ", lon = " + camLon + ", h = " + camHei);
+                    }
+                    else
+                    {
+                        camLat = jsonParse["geopose"]["pose"]["latitude"].AsDouble;
+                        camLon = jsonParse["geopose"]["pose"]["longitude"].AsDouble;
+                        camHei = jsonParse["geopose"]["pose"]["ellipsoidHeight"].AsDouble;
+                        Debug.Log("Cam GEO_v01 - lat = " + camLat + ", lon = " + camLon + ", ellH = " + camHei);
+                    }
+
                     if (currentRi == null)
                     {
                         zeroGeoCam.lat = camLat;
@@ -726,9 +740,18 @@ public class ACityAPIDev : MonoBehaviour
                             else if (useGeopose)
                             {
                                 double tlat, tlon, thei;
-                                tlat = jsonParse["scrs"][j]["content"]["geopose"]["latitude"].AsDouble;
-                                tlon = jsonParse["scrs"][j]["content"]["geopose"]["longitude"].AsDouble;
-                                thei = jsonParse["scrs"][j]["content"]["geopose"]["ellipsoidHeight"].AsDouble;
+                                if (newGeoPose)
+                                {
+                                    tlat = jsonParse["scrs"][j]["content"]["geopose"]["position"]["lat"].AsDouble;
+                                    tlon = jsonParse["scrs"][j]["content"]["geopose"]["position"]["lon"].AsDouble;
+                                    thei = jsonParse["scrs"][j]["content"]["geopose"]["position"]["h"].AsDouble;
+                                }
+                                else
+                                {
+                                    tlat = jsonParse["scrs"][j]["content"]["geopose"]["latitude"].AsDouble;
+                                    tlon = jsonParse["scrs"][j]["content"]["geopose"]["longitude"].AsDouble;
+                                    thei = jsonParse["scrs"][j]["content"]["geopose"]["ellipsoidHeight"].AsDouble;
+                                }
                                 // calc the object position relatively the recently localized camera
                                 EcefPose epobj = GeodeticToEcef(tlat, tlon, thei);
                                 Vector3 enupose = EcefToEnu(epobj, camLat, camLon, camHei);
