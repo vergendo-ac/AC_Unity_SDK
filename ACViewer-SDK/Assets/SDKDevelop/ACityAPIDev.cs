@@ -149,6 +149,7 @@ public class ACityAPIDev : MonoBehaviour
     public bool useOSCP;
     public bool ecef;
     public bool useGeopose;
+    UnityPose oldUPose;
 
     ScreenOrientation ori;
 
@@ -572,9 +573,9 @@ public class ACityAPIDev : MonoBehaviour
         {
             if (jsonParse["geopose"] != null)
             {
-                sessionId = jsonParse["geopose"]["reconstruction_id"];
-
-                Debug.Log("sessioID: " + sessionId);
+                sessionId = "1"; // jsonParse["geopose"]["reconstruction_id"];  // don't change the session as geopose SC is global
+                string debugSessionId = jsonParse["geopose"]["reconstruction_id"];
+                Debug.Log("sessioID: " + debugSessionId);
                 do
                 {
                     objectsAmount++;
@@ -611,14 +612,14 @@ public class ACityAPIDev : MonoBehaviour
                         zeroEcefCam.x = px0;
                         zeroEcefCam.y = py0;
                         zeroEcefCam.z = pz0;
-                        uim.setDebugPose(0.001f, py, pz, ox, oy, oz, ow, sessionId);
+                        uim.setDebugPose(0.001f, py, pz, ox, oy, oz, ow, debugSessionId);
                     }
                     else
                     {
                         px = (float)(px0 - zeroEcefCam.x);
                         py = (float)(py0 - zeroEcefCam.y);
                         pz = (float)(pz0 - zeroEcefCam.z);
-                        uim.setDebugPose(px, py, pz, ox, oy, oz, ow, sessionId);
+                        uim.setDebugPose(px, py, pz, ox, oy, oz, ow, debugSessionId);
                     }
                     //Debug.Log("ecef.quat = " + ox + "--" + oy + "--" + oz + "--" + ow);
                 }
@@ -670,9 +671,9 @@ public class ACityAPIDev : MonoBehaviour
                     pz = enupose.z;
                     Debug.Log("geo.quat = " + ox + "--" + oy + "--" + oz + "--" + ow);
                     if (currentRi == null)
-                        uim.setDebugPose(0.001f, py, pz, ox, oy, oz, ow, sessionId);
+                        uim.setDebugPose(0.001f, py, pz, ox, oy, oz, ow, debugSessionId);
                     else
-                        uim.setDebugPose(px, py, pz, ox, oy, oz, ow, sessionId);
+                        uim.setDebugPose(px, py, pz, ox, oy, oz, ow, debugSessionId);
                 }
                 else
                 {
@@ -683,11 +684,16 @@ public class ACityAPIDev : MonoBehaviour
                     oy = jsonParse["geopose"]["localPose"]["orientation"]["y"].AsFloat;
                     oz = jsonParse["geopose"]["localPose"]["orientation"]["z"].AsFloat;
                     ow = jsonParse["geopose"]["localPose"]["orientation"]["w"].AsFloat;
-                    uim.setDebugPose(px, py, pz, ox, oy, oz, ow, sessionId);
+                    uim.setDebugPose(px, py, pz, ox, oy, oz, ow, debugSessionId);
                 }
 
                 GameObject newCam = new GameObject("tempCam");
                 UnityPose uPose = new UnityPose(new Vector3(px, py, pz), new Quaternion(ox, oy, oz, ow));
+                if (oldUPose != null) 
+                {
+                    uim.debugPose[18].text = "DbGL: " + (uPose.pos - oldUPose.pos).magnitude;
+                }
+                oldUPose = uPose;
                 newCam.transform.localPosition = uPose.pos;
                 newCam.transform.localRotation = uPose.ori;
 
@@ -954,11 +960,15 @@ public class ACityAPIDev : MonoBehaviour
         if (!configurationSetted) SetCameraConfiguration();
         getStickersAction = getStickers;
 
-        if (!GPSlocation)
+        StartCoroutine(Locate(firstLocalization));
+
+        /*if (!GPSlocation) //FixMe: ???
         {
             StartCoroutine(Locate(firstLocalization));
         }
-        else firstLocalization(latitude, longitude, hdop, null, null);
+        else {
+            firstLocalization(latitude, longitude, hdop, null, null);
+        }*/
     }
 
     public void firstLocalization(float langitude, float latitude, float hdop, string path, Action<string, Transform, StickerInfo[]> getStickers)
