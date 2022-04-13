@@ -80,7 +80,8 @@ public class StickerController : MonoBehaviour
         }
     }
 
-    void SetScaling(float distanceToCamera) {
+    void SetScaling(float distanceToCamera)
+    {
         pins.transform.localScale = startPinScale;
         /*
         float difScaling = koefPin * (distanceToCamera - distanceToPinScalingMin);
@@ -89,7 +90,8 @@ public class StickerController : MonoBehaviour
         */
     }
 
-    public void setStickerInfo(ACityAPIDev.StickerInfo sInfo) {
+    public void setStickerInfo(ACityAPIDev.StickerInfo sInfo)
+    {
         if (sInfo.sText.Length > 40) sText.text = sInfo.sText.Substring(0, 30); else sText.text = sInfo.sText;
         if (sInfo.sSubType.Length > 40) subType.text = sInfo.sSubType.Substring(0, 30); else subType.text = sInfo.sSubType;
         rtt = sText.gameObject.GetComponent<RectTransform>();
@@ -101,7 +103,8 @@ public class StickerController : MonoBehaviour
 
     public void buttonPressed()
     {
-        if (!string.IsNullOrEmpty(stickerInfo.sOnTap) && stickerInfo.sOnTap.Contains("open_url")) {
+        if (!string.IsNullOrEmpty(stickerInfo.sOnTap) && stickerInfo.sOnTap.Contains("open_url"))
+        {
             if (!string.IsNullOrEmpty(stickerInfo.sPath)) {
                 uim.GoToURL(stickerInfo.sPath);
             }

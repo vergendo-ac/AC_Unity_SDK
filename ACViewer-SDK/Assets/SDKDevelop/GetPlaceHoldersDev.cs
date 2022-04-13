@@ -89,13 +89,14 @@ public class GetPlaceHoldersDev : MonoBehaviour
         Debug.Log("bytes = " + bytes.Length);
         Texture2D tex = new Texture2D(2, 2);
         tex.LoadImage(bytes);
-        devCamMat.mainTexture = tex;
+        devCamMat.mainTexture = tex;  //FixMe: ???
 
         //acapi.firstLocalization(59.877427f,  30.318510f, 30, devImagePath, showPlaceHolders); // home 59.877427f, 30.318510f
         //acapi.firstLocalization(59.907458f,  30.298400f, 30, devImagePath, showPlaceHolders); // Balthof
         //acapi.firstLocalization(59.832010f,  30.332837f, 30, devImagePath, showPlaceHolders); // Alf yard 59.832010f, 30.332837f
         //acapi.firstLocalization(59.832050f,  30.334570f, 30, devImagePath, showPlaceHolders); // Alf home 59.83205f, 30.33457f       // 59.832046, 30.334141 // евразия, велосипеды 59.836716, 30.334282
-        //acapi.firstLocalization(59.934320f,  30.272610f, 30, devImagePath, showPlaceHolders); // Spb VO-yard
+        //acapi.firstLocalization(59.934320f,  30.272610f, 30, devImagePath, showPlaceHolders); // Spb VO-yard vooff1.jpg
+        //acapi.firstLocalization(59.933880f, 30.272511f, 30, devImagePath, showPlaceHolders); //    Spb VO-street shlacbaum vostreet1.jpg 
         //acapi.firstLocalization(41.122400f,  16.868400f, 30, devImagePath, showPlaceHolders); // Bari cafe (lat=41.1224f, lon=16.8684f)
         //acapi.firstLocalization(43.405290f,  39.955740f, 30, devImagePath, showPlaceHolders); // Sochi 43.404521f,39.954741f 43.404080,39.954735 43.404769,39.954042 43.40529,39.95574
         //acapi.firstLocalization(22.662310f, 114.064710f, 30, devImagePath, showPlaceHolders); // China 22.66231f, 114.06471f.... 47,61163, -122,33717
@@ -104,17 +105,20 @@ public class GetPlaceHoldersDev : MonoBehaviour
         //acapi.firstLocalization(47.610907f,-122.337000f, 30, devImagePath, showPlaceHolders); // Seattle westpark 47.610907, -122.33700
         //acapi.firstLocalization(47.612983f,-122.337657f, 30, devImagePath, showPlaceHolders); // Statue westpark  47.612983, -122.337657 // 955564154, 53827994
         //acapi.firstLocalization(47.612786f,-122.335430f, 30, devImagePath, showPlaceHolders); // Statue westpark  47.612786, -122.335430
-        //acapi.firstLocalization(59.914670f,  30.303980f, 30, devImagePath, showPlaceHolders); // Новый дом, 8я красноармейская 59.914639, 30.304093 59.91462671296234, 30.304159752060876// 59.9131102286, 30.303762554748754
+        //acapi.firstLocalization(59.9145560f, 30.304109f, 30, devImagePath, showPlaceHolders); // 59.9145560f, 30.304109f - Дом, кресло rec #15142 (календарь)
         acapi.firstLocalization(  59.9145560f, 30.304109f, 30, devImagePath, showPlaceHolders); // 59.9145560f, 30.304109f - Дом, кресло rec #15142 (календарь)
         //acapi.firstLocalization(55.756477f,  37.619737f, 30, devImagePath, showPlaceHolders); // Msk metro west 55.756477f, 37.619737f
         //acapi.firstLocalization(55.756680f,  37.619830f, 30, devImagePath, showPlaceHolders); // Msk metro subw 55.756680f, 37.619830f
-        //Milan - rec 15113, 15112
+        //acapi.firstLocalization(59.987274f, 30.197186f, 30, devImagePath, showPlaceHolders); // Sergey Fed home 59.987274f, 30.197186f sergk.jpg
+        //acapi.firstLocalization(55.755384f, 37.619539f, 30, devImagePath, showPlaceHolders);    //{Nikolskaya-kremlin 55.755384, 37.619539 nikolkp.jpg, nikolkp2.jpg},  Center 55.756512, 37.621499, {Lubyanka 55.759247, 37.625317 - nikol1.jpg}
+        //acapi.firstLocalization(59.300038597411586f, 30.021741184295532f, 30, devImagePath, showPlaceHolders);    //{Constantine  59.300038597411586, 30.021741184295532, constantineoutdoor.jpg, constantinedoor.jpg}
+
+        //acapi.firstLocalization(devLatitude, devLongitude, 30, devImagePath, showPlaceHolders);
 
         timerRelocation = timeForRelocation;
         ARStarted = true;
         relocationCompleted = false;
     }
-
 
     public void startLocalization()
     {
@@ -259,11 +263,6 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 VideoPlayer vidos = urlVid.GetComponentInChildren<VideoPlayer>();
                                 vidos.source = VideoSource.Url;
                                 vidos.url = stickers[j].sPath;
-//#if PLATFORM_ANDROID                                                    //FixMe: waits AC cert fix
-//                                vidos.url = vidos.url.Replace("https://developer.augmented.city",
-//                                                               "http://developer.augmented.city");
-//#endif
-//                                Debug.Log("VID URL = " + vidos.url);
                                 videoURLs.Add(urlVid);
                             }
                             else if (is3dModel || is3dModelTransfer)    // 3d object or special navi object
@@ -337,7 +336,8 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                     + " model.rot = " + model.transform.localRotation
                                     + " stick.ori = " + stickers[j].orientations);*/
 
-                                if (stickers[j].SModel_scale.Length > 0) {
+                                if (stickers[j].SModel_scale.Length > 0)
+                                {
                                     float scale = float.Parse(stickers[j].SModel_scale);
                                     model.transform.localScale = new Vector3(scale, scale, scale);
                                 }
@@ -447,8 +447,10 @@ public class GetPlaceHoldersDev : MonoBehaviour
       //movingTransform.Translate(-deltaTranslateVector);
         movingTransform.rotation = Quaternion.Slerp(startRotation, targetRotation, (moveFrames - frameCounter) / moveFrames);
         frameCounter--;
-        if (frameCounter <= 0) {
-            translateAction = false; relocationCompleted = true;
+        if (frameCounter <= 0)
+        {
+            translateAction = false;
+            relocationCompleted = true;
         }
     }
 
@@ -604,7 +606,8 @@ public class GetPlaceHoldersDev : MonoBehaviour
         else Debug.Log("activeReco null");
     }
 
-   /* public void SaveModelToServer(GameObject model, string bundleName)
+    /*
+    public void SaveModelToServer(GameObject model, string bundleName)
     {
         if (activeReco != null)
         {
@@ -620,15 +623,18 @@ public class GetPlaceHoldersDev : MonoBehaviour
             // set3dToLocal(lastLocalizedRecoId, bundleName, model.transform.localPosition, model.transform.localRotation);
         }
         else Debug.Log("activeReco null");
-    }
-   */
-    public void setNewModelObjectId(string objectParams) {
+    }*/
+
+    public void setNewModelObjectId(string objectParams)
+    {
         if (modelToServer != null) {
             modelToServer.GetComponent<Mover>().objectId = objectParams;
         }
     }
 
-    public void set3dToLocal(string id, string name, Vector3 coords, Quaternion orientation) {
+    /*
+    public void set3dToLocal(string id, string name, Vector3 coords, Quaternion orientation)
+    {
         PlayerPrefs.SetString(id, name);
         PlayerPrefs.SetFloat(id + "coordx", coords.x);
         PlayerPrefs.SetFloat(id + "coordy", coords.y);
@@ -639,7 +645,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
         PlayerPrefs.SetFloat(id + "oriw", orientation.w);
         PlayerPrefs.Save();
         Debug.Log("saved pos = " + coords + ", ori = " + orientation);
-    }
+    }*/
 
     public GameObject get3dFromLocal(string id)
     {
