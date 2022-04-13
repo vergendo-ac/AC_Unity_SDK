@@ -5,12 +5,12 @@ using UnityEngine.EventSystems;
 
 public class LongTap : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-
     public GameObject shortTap;
     public GameObject longTap;
     public float timeForLongTap = 2f;
     float timer;
     bool tapped, upped;
+
     void Start()
     {
         timer = 0;
@@ -22,12 +22,14 @@ public class LongTap : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
             timer = timer + Time.deltaTime;
         }
 
-        if ((upped)||(timer>3f)) {
-            if (timer > timeForLongTap)
-            {
+        if ( upped || (timer > 3f) )
+        {
+            if (timer > timeForLongTap) {
                 longTap.SetActive(true);
             }
-            else { shortTap.SetActive(true); }
+            else {
+                shortTap.SetActive(true);
+            }
             upped = false;
             tapped = false;
             timer = 0;

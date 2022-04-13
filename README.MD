@@ -20,7 +20,7 @@ Set project settings for Android and ARcore:
 
 Set project settings for iOS and ARKit:
 - Allow 'unsafe' Code - true
-- other settings standart for ARKit with Unity.
+- other settings standard for ARKit with Unity.
 
 
 ### Usage details
