@@ -211,10 +211,10 @@ public class Mover : MonoBehaviour
         }
 
 // #if !UNITY_EDITOR
+// #endif
         if (!noGravity) {
             myGO.transform.eulerAngles = new Vector3(0, myGO.transform.eulerAngles.y, 0);
         }
-// #endif
         if (landed && locked) {
             myGO.transform.position = new Vector3(myGO.transform.position.x, pm.getPlaneY(), myGO.transform.position.z);
         }

@@ -58,6 +58,7 @@ public class ACityAPIDev : MonoBehaviour
     /// pseudo-singletone; assigned at Awake and cleared at OnDestroy
     /// </summary>
     public static ACityAPIDev Instance{ get; private set; }
+
     public class RecoInfo
     {
         public string id;
@@ -115,7 +116,6 @@ public class ACityAPIDev : MonoBehaviour
         public double h;
     }
 
-
     public enum LocalizationStatus
     {
         NotStarted,
@@ -128,7 +128,7 @@ public class ACityAPIDev : MonoBehaviour
     }
 
     public bool editorTestMode = false;
-    //public string ServerAPI = "http://developer.augmented.city";
+    //public string ServerAPI = "https://developer.augmented.city";
 
     public GameObject devButton;
 
@@ -170,7 +170,8 @@ public class ACityAPIDev : MonoBehaviour
 
     LocalizationStatus localizationStatus = LocalizationStatus.NotStarted;
     UIManager uim;
-    
+
+
     /// <summary>
     /// initialized on Awake, data readed from PlayerPrefs at Awake and saved on demand
     /// </summary>
@@ -183,15 +184,17 @@ public class ACityAPIDev : MonoBehaviour
             return;
         }
         Instance = this;
-        if (URLs == null)
+        if (URLs == null) {
             URLs = new ServerURLs();
+        }
         URLs.Load();
     }
 
     private void OnDestroy()
     {
-        if (Instance == this)
+        if (Instance == this) {
             Instance = null;
+        }
     }
 
     void Start()
@@ -212,7 +215,7 @@ public class ACityAPIDev : MonoBehaviour
 #if UNITY_EDITOR 
         editorTestMode = true;
         devButton.SetActive(true);
-        AudioListener.volume = 0;
+        AudioListener.volume = 0.1f;  // app controls an audio
 #else
     editorTestMode = false;
 #endif
@@ -1212,7 +1215,7 @@ public class ACityAPIDev : MonoBehaviour
 
     IEnumerator prepareC(float langitude, float latitude, Action<bool, string> getServerAnswer)
     {
-        // Example: http://developer.augmented.city/api/localizer/prepare?lat=59.907458f&lon=30.298400f
+        // Example: https://developer.augmented.city/api/localizer/prepare?lat=59.907458f&lon=30.298400f
         //
         string req = apiURL + "/api/localizer/prepare?lat=" + latitude + "f&lon=" + langitude + "f";
         Debug.Log(req);
@@ -1299,7 +1302,6 @@ public class ACityAPIDev : MonoBehaviour
         return cameraDistance;
     }
 
-  
 
     void FixedUpdate()
     {
@@ -1317,8 +1319,9 @@ public class ACityAPIDev : MonoBehaviour
 
     IEnumerator GetTimerC()
     {
-        var sw = UnityWebRequest.Get(apiURL + "/api/v2/server_timestamp");
-        Debug.Log("Connecting to " + apiURL + "/api/v2/server_timestamp");
+        string req = apiURL + "/api/v2/server_timestamp";
+        var sw = UnityWebRequest.Get(req);
+        Debug.Log("GetTimerC: getting " + req);
         yield return sw.SendWebRequest();
         if (sw.isNetworkError || sw.isHttpError)
         {
