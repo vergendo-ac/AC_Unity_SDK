@@ -289,7 +289,6 @@ public class Mover : MonoBehaviour
         // if (modelManager.pl != null) modelManager.pl.SetActive(false);
     }
 
-
     public void setLocked(bool loc)
     {
         GameObject man = GameObject.FindGameObjectWithTag("Manager");

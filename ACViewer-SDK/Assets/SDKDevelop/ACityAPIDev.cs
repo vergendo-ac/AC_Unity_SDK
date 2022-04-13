@@ -296,7 +296,7 @@ public class ACityAPIDev : MonoBehaviour
     {
         uim.statusDebug("Get cam frame");
         XRCpuImage image;
-        // if (m_CameraManager.TryGetLatestImage(out image))
+        // if (m_CameraManager.TryGetLatestImage(out image))  //FixMe: ?
         if (m_CameraManager.TryAcquireLatestCpuImage(out image))
         {
             var conversionParams = new XRCpuImage.ConversionParams
@@ -1039,9 +1039,6 @@ public class ACityAPIDev : MonoBehaviour
 
     IEnumerator UploadJPGwithGPSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
     {
-        //FixMe: PlayerPrefs.SetString("ApiUrl", "http://developer.augmented.city");
-        //Debug.Log("!!! Activating AC server - http://developer.augmented.city");
-
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
         //  byte[] bytes = File.ReadAllBytes(filePath);
         Debug.Log("nBytes: " + bytes.Length);

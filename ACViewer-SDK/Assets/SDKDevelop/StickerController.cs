@@ -98,7 +98,6 @@ public class StickerController : MonoBehaviour
         marker = markerRt.gameObject;
         StartCoroutine(setScale());
         stickerInfo = sInfo;
-        //Debug.Log("Address stick   " + stickerInfo.sAddress);
     }
 
     public void buttonPressed()
