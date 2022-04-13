@@ -233,6 +233,10 @@ public class UIManager : MonoBehaviour
             Application.OpenURL(stickerInfoForPanel.sPath);
         }
     }
+    public void GoToURL(string url)
+    {
+        Application.OpenURL(url);
+    }
 
     public void DownSwipe()
     {

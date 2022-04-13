@@ -85,6 +85,7 @@ public class ACityAPIDev : MonoBehaviour
         public string sTrajectoryPeriod;
         public string sId;
         public string objectId;
+        public string sOnTap;
         public string sAddress;
         public string sFeedbackAmount;
         public string sRating;
@@ -445,6 +446,7 @@ public class ACityAPIDev : MonoBehaviour
                                     stickers[j].sId               = "" + jsonParse["objects"][x]["sticker"]["sticker_id"];
                                     stickers[j].objectId          = "" + jsonParse["objects"][x]["placeholder"]["placeholder_id"];
                                     stickers[j].sImage            = "" + jsonParse["objects"][x]["sticker"]["Image"];
+                                    stickers[j].sOnTap            = "" + jsonParse["objects"][x]["sticker"]["on_tap"];
                                     stickers[j].sAddress          = "" + jsonParse["objects"][x]["sticker"]["Address"];
                                     stickers[j].sFeedbackAmount   = "" + jsonParse["objects"][x]["sticker"]["Feedback amount"];
                                     stickers[j].sRating           = "" + jsonParse["objects"][x]["sticker"]["Rating"];
@@ -478,6 +480,7 @@ public class ACityAPIDev : MonoBehaviour
                                     currentRi.stickerArray[j].SModel_scale      = stickers[j].SModel_scale;
                                     currentRi.stickerArray[j].sId               = stickers[j].sId;
                                     currentRi.stickerArray[j].sImage            = stickers[j].sImage;
+                                    currentRi.stickerArray[j].sOnTap            = stickers[j].sOnTap;
                                     currentRi.stickerArray[j].sAddress          = stickers[j].sAddress;
                                     currentRi.stickerArray[j].sRating           = stickers[j].sRating;
                                     currentRi.stickerArray[j].sUrl_ta           = stickers[j].sUrl_ta;
@@ -530,6 +533,7 @@ public class ACityAPIDev : MonoBehaviour
                         stickers[j].sDescription = currentRi.stickerArray[j].sDescription;
                         stickers[j].sId          = currentRi.stickerArray[j].sId;
                         stickers[j].sImage       = currentRi.stickerArray[j].sImage;
+                        stickers[j].sOnTap       = currentRi.stickerArray[j].sOnTap;
 
                         currentRi.stickerArray[j].sAddress = stickers[j].sAddress;
                         currentRi.stickerArray[j].sRating  = stickers[j].sRating;
@@ -834,6 +838,7 @@ public class ACityAPIDev : MonoBehaviour
                             stickers[j].sId                = "" + jsonParse["scrs"][j]["content"]["custom_data"]["sticker_id"];
                             stickers[j].objectId           = "" + jsonParse["scrs"][j]["content"]["custom_data"]["placeholder_id"];
                             stickers[j].sImage             = "" + jsonParse["scrs"][j]["content"]["custom_data"]["Image"];
+                            stickers[j].sOnTap             = "" + jsonParse["scrs"][j]["content"]["custom_data"]["on_tap"];
                             stickers[j].sAddress           = "" + jsonParse["scrs"][j]["content"]["custom_data"]["Address"];
                             stickers[j].sFeedbackAmount    = "" + jsonParse["scrs"][j]["content"]["custom_data"]["Feedback amount"];
                             stickers[j].sRating            = "" + jsonParse["scrs"][j]["content"]["custom_data"]["Rating"];
@@ -866,6 +871,7 @@ public class ACityAPIDev : MonoBehaviour
                             currentRi.stickerArray[j].SModel_scale      = stickers[j].SModel_scale;
                             currentRi.stickerArray[j].sId               = stickers[j].sId;
                             currentRi.stickerArray[j].sImage            = stickers[j].sImage;
+                            currentRi.stickerArray[j].sOnTap            = stickers[j].sOnTap;
                             currentRi.stickerArray[j].sAddress          = stickers[j].sAddress;
                             currentRi.stickerArray[j].sRating           = stickers[j].sRating;
                             currentRi.stickerArray[j].sUrl_ta           = stickers[j].sUrl_ta;
