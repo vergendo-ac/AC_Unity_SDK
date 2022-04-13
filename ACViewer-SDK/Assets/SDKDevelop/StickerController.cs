@@ -101,9 +101,17 @@ public class StickerController : MonoBehaviour
 
     public void buttonPressed()
     {
-            activate(true);
+        if (!string.IsNullOrEmpty(stickerInfo.sOnTap) && stickerInfo.sOnTap.Contains("open_url")) {
+            if (!string.IsNullOrEmpty(stickerInfo.sPath)) {
+                uim.GoToURL(stickerInfo.sPath);
+            }
+        }
+        else
+        {
             uim.SetStickerPanel(stickerInfo, activate);
+            activate(true);
             //Debug.Log(Vector3.Magnitude(this.transform.position - target.transform.position));
+        }
     }
 
     IEnumerator setScale()
