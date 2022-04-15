@@ -128,7 +128,6 @@ public class ACityAPIDev : MonoBehaviour
     }
 
     public bool editorTestMode = false;
-    //public string ServerAPI = "https://developer.augmented.city";
 
     public GameObject devButton;
 
@@ -969,17 +968,19 @@ public class ACityAPIDev : MonoBehaviour
         if (!configurationSetted) SetCameraConfiguration();
         getStickersAction = getStickers;
 
-        StartCoroutine(Locate(firstLocalization));
+        StartCoroutine(Locate(firstLocalization));  // always obtain the position and then the localization is called
 
-        /*if (!GPSlocation) //FixMe: ???
-        {
-            StartCoroutine(Locate(firstLocalization));
+        /*if (!GPSlocation) {
+            StartCoroutine(Locate(firstLocalization));                 // obtain position at the first time
         }
         else {
-            firstLocalization(latitude, longitude, hdop, null, null);
+            firstLocalization(latitude, longitude, hdop, null, null);  // use the initially found position
         }*/
     }
 
+    /// <summary>
+    /// Performs localization with the given position data and the action like the result obtaining. It's the first in Editor mode.
+    /// </summary>
     public void firstLocalization(float langitude, float latitude, float hdop, string path, Action<string, Transform, StickerInfo[]> getStickers)
     {
         byte[] bjpg;
@@ -1000,7 +1001,9 @@ public class ACityAPIDev : MonoBehaviour
             }
         }
 
-        if (getStickers != null) getStickersAction = getStickers;
+        if (getStickers != null) {
+            getStickersAction = getStickers;
+        }
         cameraRotationInLocalization = ARCamera.transform.rotation.eulerAngles;
         cameraPositionInLocalization = ARCamera.transform.position;
         if (bjpg != null)

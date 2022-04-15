@@ -27,47 +27,26 @@ public class Mover : MonoBehaviour
     [HideInInspector]
     public string modelName;
     public string objectId;
+
     PlaneManager pm;
 
 
     void Start()
     {
-        cam = Camera.main.gameObject;
+        cam      = Camera.main.gameObject;
         camTrans = Camera.main.transform;
-        camMain = Camera.main;
-        timer = 0;
-        myGO = this.gameObject;
+        camMain  = Camera.main;
+        timer    = 0;
+        myGO     = this.gameObject;
 
-        
         GameObject man = GameObject.FindGameObjectWithTag("Manager");
         modelManager = man.GetComponent<ModelManager>();
 
         pm = man.GetComponent<PlaneManager>();
-        
     }
 
     void Update()
     {
-      /*if (Input.GetMouseButton(0))
-        {
-            //  if (modelManager.pl != null) modelManager.pl.SetActive(true);
-            Vector3 pp = new Vector3();
-            int layerMask = 1 << 9;
-            //layerMask = ~layerMask;
-            Ray ray = camMain.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, 1000f, layerMask))
-            {
-                pp = hit.point;
-                Debug.Log("hit pos = " + pp + "    GO = " + hit.collider.gameObject + "magnitude = " + (transform.position - pp).magnitude);
-
-              //if ((transform.position - pp).magnitude < 0.6f)
-                    transform.position = Vector3.MoveTowards(transform.position, new Vector3(pp.x, transform.position.y, pp.z), 0.04f);
-                if (modelManager.shadowObj != null)
-                    modelManager.shadowObj.transform.position = new Vector3(
-                        transform.position.x, modelManager.shadowObj.transform.position.y, transform.position.z);
-            }
-        }*/
         if (modelManager.GetEditMode())
         {
             if (!locked)

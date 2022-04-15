@@ -56,33 +56,20 @@ public class UIManager : MonoBehaviour
 
     public GameObject SettingsPanel;
 
-    #region Support for selection arrow
-
-    #endregion
-
 
     void Start()
     {
         string ver = Application.version;
-        if (PlayerPrefs.HasKey("bver"))
-        {
-            if (!(PlayerPrefs.GetString("bver").Equals(ver)))
-            {
-                UnityWebRequest.ClearCookieCache();
-                Caching.ClearCache();
-                PlayerPrefs.DeleteAll();
-                PlayerPrefs.SetString("bver", ver);
-            }
-        }
-        else
+        bool clearAll = !PlayerPrefs.HasKey("bver") ||
+                       !(PlayerPrefs.GetString("bver").Equals(ver));
+        if (clearAll)
         {
             UnityWebRequest.ClearCookieCache();
             Caching.ClearCache();
             PlayerPrefs.DeleteAll();
             PlayerPrefs.SetString("bver", ver);
         }
-
-        Debug.Log("Version " + Application.version + " bver " + ver);
+        Debug.Log("Version " + ver);
 
         gph = GetComponent<GetPlaceHoldersDev>();
         stickerInfoForPanel = null;
@@ -206,7 +193,9 @@ public class UIManager : MonoBehaviour
 
     public void SetStickerPanel(ACityAPIDev.StickerInfo sInfo, Action<bool> stDeAct)
     {
-        if (stickerDeActivate == null) { stickerDeActivate = stDeAct; }
+        if (stickerDeActivate == null) {
+            stickerDeActivate = stDeAct;
+        }
         if ((stickerPanel.activeSelf) && sInfo.Equals(stickerInfoForPanel))
         {
             stickerPanel.SetActive(false);
@@ -227,15 +216,16 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void GoToStickerSite()
-    {
-        if (stickerInfoForPanel.sPath.Length > 0) {
-            Application.OpenURL(stickerInfoForPanel.sPath);
-        }
-    }
     public void GoToURL(string url)
     {
         Application.OpenURL(url);
+    }
+
+    public void GoToStickerSite()
+    {
+        if (!string.IsNullOrEmpty(stickerInfoForPanel.sPath)) {
+            GoToURL(stickerInfoForPanel.sPath);
+        }
     }
 
     public void DownSwipe()
@@ -337,7 +327,7 @@ public class UIManager : MonoBehaviour
 
     public void planeDebug(float yplane)
     {
-        debugPose[12].text = "PlaneUnderCam: " + (aRcamera.transform.position.y - yplane);
+        debugPose[12].text = "HAGL: " + (aRcamera.transform.position.y - yplane);
     }
 
     public void statusDebug(string status)

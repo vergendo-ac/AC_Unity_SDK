@@ -31,6 +31,8 @@ public class StickerController : MonoBehaviour
     [HideInInspector]
     public float distanceToCamera;
 
+    const float maxDistanceCamToVisibleMarker = 15f;   // marker is visible if the distance to the camera less than this value in meters
+    const float maxDistanceCamToVisiblePin    = 30f;   // pin    is visible if the distance to the camera less than this value in meters
 
     void Start()
     {
@@ -38,12 +40,14 @@ public class StickerController : MonoBehaviour
         Canvas cv = GetComponent<Canvas>();
         cv.worldCamera = target.GetComponent<Camera>();
         uim = GameObject.FindGameObjectWithTag("Manager").GetComponent<UIManager>();
-        startLocalScale = this.transform.localScale*2;
-        startPinScale = pins.transform.localScale;
-        startPinPosition = pins.transform.localPosition;
 
+        startLocalScale  = this.transform.localScale * 2;
+        startPinScale    = pins.transform.localScale;
+        startPinPosition = pins.transform.localPosition;
         distanceToCamera = Vector3.Magnitude(this.transform.position - target.transform.position);
-        if (distanceToCamera > distanceToPinScalingMax) { SetScaling(distanceToPinScalingMax); }
+        if (distanceToCamera > distanceToPinScalingMax) {
+            SetScaling(distanceToPinScalingMax);
+        }
         pinVis = GetComponentInChildren<Visiability>();
     }
 
@@ -53,7 +57,7 @@ public class StickerController : MonoBehaviour
         transform.eulerAngles = new Vector3(0 , transform.eulerAngles.y, 0);
         distanceToCamera = Vector3.Magnitude(this.transform.position - target.transform.position);
         this.transform.localScale = startLocalScale;    // * koefSticker * distanceToCamera;
-        if (distanceToCamera > 15f) {
+        if (distanceToCamera > maxDistanceCamToVisibleMarker) {
             SetMarker(false);
         }
         else {
@@ -66,7 +70,7 @@ public class StickerController : MonoBehaviour
         activePin.SetActive(activated);
         passivePin.SetActive(!activated);
 
-        if (distanceToCamera > 30f) {
+        if (distanceToCamera > maxDistanceCamToVisiblePin) {
             pins.SetActive(false);
         }
         else {

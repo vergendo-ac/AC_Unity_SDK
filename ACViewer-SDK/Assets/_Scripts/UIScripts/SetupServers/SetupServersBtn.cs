@@ -15,16 +15,17 @@ public class SetupServersBtn : MonoBehaviour
     private void Start()
     {
         btn.onClick.AddListener(OnButtonClick);
-        if (panel == null)
+        if (panel == null) {
             panel = FindObjectOfType<SetupServersPanel>(true);
+        }
     }
 
     void OnButtonClick()
     {
         panel.gameObject.SetActive(true);
     }
+
     void Update()
     {
-        
     }
 }
