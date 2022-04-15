@@ -54,7 +54,8 @@ public class ModelManager : MonoBehaviour
     }
 
 
-    public void firstButton(GameObject act) {
+    public void firstButton(GameObject act)
+    {
         activeButtonImage = act;
         activeButtonImage.SetActive(true);
         actImage = activeButtonImage.GetComponentInChildren<Image>();
@@ -110,20 +111,6 @@ public class ModelManager : MonoBehaviour
         Destroy(go);
     }
 
-    /*public void SaveModel()
-    {
-        if (activeModel != null)
-        {
-            gph.SaveModelToServer(activeModel, bundleName);
-            uim.newObjButton.SetActive(true);
-            uim.addButton.SetActive(false);
-            activeModel.GetComponent<Mover>().setLocked(true);
-        }
-        if (pl != null) Destroy(pl);
-        if (ground != null) Destroy(ground);
-        if (shadowObj != null) Destroy(shadowObj);
-    }*/
-    
     public void BackToChoice()
     {
         if (activeModel != null)
@@ -160,16 +147,4 @@ public class ModelManager : MonoBehaviour
         }
     }
 
-   /* public void DeleteModel()
-    {
-        if (modelToDelete != null)
-        {
-            if (objectIdToDelete != null)
-            {
-                Destroy(modelToDelete);
-                gph.deleteSticker(objectIdToDelete);
-            }
-        }
-    }
-   */
 }
