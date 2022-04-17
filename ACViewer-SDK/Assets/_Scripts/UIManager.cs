@@ -122,6 +122,7 @@ public class UIManager : MonoBehaviour
 
         debugPose[15].text = DateTime.UtcNow.ToString();  //DateTime.Now.ToString();
     }
+
     public void HideSettingsPanel()
     {
         SettingsPanel.gameObject.SetActive(false);
@@ -137,6 +138,7 @@ public class UIManager : MonoBehaviour
     {
         if (pauseStatus) ReloadScene("1");
     }
+
     public void Restart()
     {
         ReloadScene("1");
