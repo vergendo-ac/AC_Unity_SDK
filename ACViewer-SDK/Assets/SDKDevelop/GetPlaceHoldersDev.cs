@@ -48,8 +48,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
     GameObject pcloud;
 
     bool ARStarted, relocationCompleted, toShowPlaceHolders, videoDemosTurn, toShowStickers;
-    public float timeForRelocation = 20f;  // set reloc time to 20 secs by default
+    public float timeForRelocation = 20f;           // set reloc time to 20 secs by default
 
+    bool  firstStart      = true;                   // flag if it's first loca is active
+    float cantLocTimerDef = 30f;                    // set loca timeout default value to 30 secs
+    float cantLocTimer    = 30f/*cantLocTimerDef*/; // set loca timeout to 30 secs
 
     void Start()
     {
@@ -159,9 +162,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
     {
         if (id != null)
         {
-          /*Debug.Log("zeroPpos = " + zeroP.position.x + "    " + zeroP.position.y + "    " + zeroP.position.z);
-            Debug.Log("zeroPori = " + zeroP.eulerAngles.x + "    " + zeroP.eulerAngles.y + "    " + zeroP.eulerAngles.z);*/
-
+            /*
+            Debug.Log("zeroPpos = " + zeroP.position.x + "    " + zeroP.position.y + "    " + zeroP.position.z);
+            Debug.Log("zeroPori = " + zeroP.eulerAngles.x + "    " + zeroP.eulerAngles.y + "    " + zeroP.eulerAngles.z);
+            */
+            firstStart = false;
             GameObject placeHolderParent;
             placeHolderParent = checkSavedID(id);
 
@@ -429,6 +434,15 @@ public class GetPlaceHoldersDev : MonoBehaviour
         }
     }
 
+    void cantFindLocations()
+    {
+        firstStart = true;
+        ARStarted  = false;
+        uim.localizeProgress.SetActive(false);
+        uim.notLocalizedForSomeTime.SetActive(true);
+        cantLocTimer = cantLocTimerDef;
+    }
+
     void Translocation(GameObject transObject, Transform targetTransform, float time)
     {
         movingTransform      = transObject.transform;
@@ -471,6 +485,14 @@ public class GetPlaceHoldersDev : MonoBehaviour
                     startLocalization();
                 }
                 timerRelocation = timeForRelocation;
+            }
+
+            if (firstStart)
+            {
+                cantLocTimer = cantLocTimer - Time.fixedDeltaTime;
+                if (cantLocTimer < 0) {
+                    cantFindLocations();
+                }
             }
         }
     }
