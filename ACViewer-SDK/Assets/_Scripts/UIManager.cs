@@ -24,7 +24,7 @@ public class UIManager : MonoBehaviour
     public GameObject lowPanelButtons;
     public GameObject mapButtons;
     public GameObject menuButtons;
-    public GameObject loclizeProgress;
+    public GameObject localizeProgress;
     public GameObject centerImage;
     public GameObject addButton;
     public GameObject newObjButton;
@@ -32,12 +32,13 @@ public class UIManager : MonoBehaviour
     public GameObject navigStickPanel;
     public GameObject navigPathGoodPanel;
     public GameObject navigPathFailedPanel;
+    public GameObject notLocalizedForSomeTime;
 
     public GameObject debugPanel;
     public Canvas     debugCanvas;
 
     public GameObject newObject;
-
+    public GameObject introPanel;
 
     public float koefSticker;
     public float koefPin;
@@ -98,6 +99,15 @@ public class UIManager : MonoBehaviour
             }
         }
 
+        if (PlayerPrefs.HasKey("intro"))
+        {
+            if (PlayerPrefs.GetInt("intro") == 1)
+            {
+                introPanel.SetActive(false);
+                PlayerPrefs.SetInt("intro", 2);
+            }
+        }
+
         if (PlayerPrefs.HasKey("hint")) {
             placeholderHint.text = PlayerPrefs.GetString("hint");
         }
@@ -130,7 +140,7 @@ public class UIManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-       // if (PlayerPrefs.HasKey("Navigation")) { PlayerPrefs.DeleteKey("Navigation"); }
+      //if (PlayerPrefs.HasKey("Navigation")) { PlayerPrefs.DeleteKey("Navigation"); }
         if (PlayerPrefs.HasKey("config"))     { PlayerPrefs.DeleteKey("config"); }
     }
 
@@ -141,6 +151,7 @@ public class UIManager : MonoBehaviour
 
     public void Restart()
     {
+        PlayerPrefs.SetInt("intro", 1);
         ReloadScene("1");
     }
 
@@ -265,7 +276,7 @@ public class UIManager : MonoBehaviour
 
     public void setLocalizeProgress(bool act)
     {
-        loclizeProgress.SetActive(act);
+        localizeProgress.SetActive(act);
     }
 
     public void setColorCenterImage()
