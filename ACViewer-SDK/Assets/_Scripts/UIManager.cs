@@ -146,6 +146,7 @@ public class UIManager : MonoBehaviour
 
     void OnApplicationPause(bool pauseStatus)
     {
+        PlayerPrefs.SetInt("intro", 1);
         if (pauseStatus) ReloadScene("1");
     }
 
