@@ -52,10 +52,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
 
     bool  firstStart      = true;                   // flag if it's first loca is active
     float cantLocTimerDef = 30f;                    // set loca timeout default value to 30 secs
-    float cantLocTimer    = 30f/*cantLocTimerDef*/; // set loca timeout to 30 secs
+    float cantLocTimer;                             
 
     void Start()
     {
+        cantLocTimer = cantLocTimerDef;             // set loca timeout to 30 secs
         acapi = GetComponent<ACityAPIDev>();
         Screen.sleepTimeout = SleepTimeout.NeverSleep;
         aRcamera = Camera.main.gameObject;
