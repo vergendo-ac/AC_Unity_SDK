@@ -4,13 +4,13 @@ https://developer.augmented.city/doc#operation/localize
 
 ### Requirements
 
-Unity version 2021.1.19f or higher.
+Unity version 2021.3.2f1 or higher.
 Before importing the package, please do the following in the project:
 
 SDK uses ARFoundation systems, so you have to install packages (Window -> Package manager):
-- ARFoundation 4.1.9
-- ARCore XR Plugin 4.1.9
-- ARKit XR Plugin 4.1.9
+- ARFoundation 4.2.2
+- ARCore XR Plugin 4.2.2
+- ARKit XR Plugin 4.2.2
 
 Set project settings for Android and ARcore:
 - Allow 'unsafe' Code - true
