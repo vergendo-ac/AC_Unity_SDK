@@ -99,15 +99,6 @@ public class UIManager : MonoBehaviour
             }
         }
 
-        if (PlayerPrefs.HasKey("intro"))
-        {
-            if (PlayerPrefs.GetInt("intro") == 1)
-            {
-                introPanel.SetActive(false);
-                PlayerPrefs.SetInt("intro", 2);
-            }
-        }
-
         if (PlayerPrefs.HasKey("hint")) {
             placeholderHint.text = PlayerPrefs.GetString("hint");
         }
@@ -140,19 +131,22 @@ public class UIManager : MonoBehaviour
 
     private void OnApplicationQuit()
     {
-      //if (PlayerPrefs.HasKey("Navigation")) { PlayerPrefs.DeleteKey("Navigation"); }
+        //if (PlayerPrefs.HasKey("Navigation")) { PlayerPrefs.DeleteKey("Navigation"); }
+        PlayerPrefs.SetInt("intro", 0);
         if (PlayerPrefs.HasKey("config"))     { PlayerPrefs.DeleteKey("config"); }
+    }
+
+    public void IntroWatched() {
+        PlayerPrefs.SetInt("intro", 0);
     }
 
     void OnApplicationPause(bool pauseStatus)
     {
-        PlayerPrefs.SetInt("intro", 1);
         if (pauseStatus) ReloadScene("1");
     }
 
     public void Restart()
     {
-        PlayerPrefs.SetInt("intro", 1);
         ReloadScene("1");
     }
 
