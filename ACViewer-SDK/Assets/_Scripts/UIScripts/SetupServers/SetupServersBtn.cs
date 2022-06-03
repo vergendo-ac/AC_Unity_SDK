@@ -5,9 +5,13 @@ using UnityEngine.UI;
 
 public class SetupServersBtn : MonoBehaviour
 {
-    // Start is called before the first frame update
+    const string pass = "acbari";
+
     [SerializeField]
     SetupServersPanel panel;
+
+    [SerializeField]
+    GameObject passwordPanel;
 
     [SerializeField]
     Button btn;
@@ -22,10 +26,26 @@ public class SetupServersBtn : MonoBehaviour
 
     void OnButtonClick()
     {
-        panel.gameObject.SetActive(true);
+        if (PlayerPrefs.HasKey("serpass"))
+        {
+            OpenChangeServerPanel();
+        }
+        else
+        {
+            passwordPanel.SetActive(true);
+        }
     }
 
-    void Update()
-    {
+    public void CheckPassword(InputField ifield) {
+        if (ifield.text.Contains(pass)) 
+        {
+            passwordPanel.SetActive(false);
+            PlayerPrefs.SetInt("serpass", 1);
+            OpenChangeServerPanel();
+        }
+    }
+
+    void OpenChangeServerPanel() {
+        panel.gameObject.SetActive(true);
     }
 }
