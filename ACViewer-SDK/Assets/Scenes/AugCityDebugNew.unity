@@ -1354,7 +1354,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &114633100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15012,7 +15012,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1334500540
 RectTransform:
   m_ObjectHideFlags: 0
@@ -16112,9 +16112,9 @@ MonoBehaviour:
   right: 90
   up: 90
   forward: 0
-  useOSCP: 0
+  useOSCP: 1
   ecef: 0
-  useGeopose: 0
+  useGeopose: 1
   URLs:
     CustomUrlIndex: 12
     CurUrlId: 1
