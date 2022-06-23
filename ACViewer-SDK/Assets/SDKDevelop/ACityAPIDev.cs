@@ -1409,4 +1409,8 @@ public class ACityAPIDev : MonoBehaviour
         return new Vector3((float)xEast, (float)yNorth, (float)zUp);
     }
 
+    public string GetApiURL() {
+        return apiURL;
+    }
+
 }
