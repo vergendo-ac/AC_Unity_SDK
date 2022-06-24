@@ -39,6 +39,7 @@ public class UIManager : MonoBehaviour
 
     public GameObject newObject;
     public GameObject introPanel;
+    public GameObject introMessagePanel;
 
     public float koefSticker;
     public float koefPin;
@@ -88,6 +89,15 @@ public class UIManager : MonoBehaviour
             PlayerPrefs.SetFloat("TimeForRelocation", gph.timeForRelocation);
             placeholderRelocationTimer.text = "" + gph.timeForRelocation;
             Debug.Log("PlayerPrefs.HasKey(TimeForRelocation) <= " + gph.timeForRelocation);
+        }
+
+        if (PlayerPrefs.HasKey("IntroMessage"))
+        {
+            introMessagePanel.SetActive(false);
+        }
+        else
+        {
+            PlayerPrefs.SetInt("IntroMessage", 1);
         }
 
         if (PlayerPrefs.HasKey("debug"))
