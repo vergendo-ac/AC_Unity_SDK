@@ -366,7 +366,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 }
                                 if (newSticker != null)
                                 {
-                                    newSticker.transform.position = stickers[j].mainPositions; // stickers[j].positions[0] - raznp;
+                                    newSticker.transform.localPosition = stickers[j].mainPositions; // stickers[j].positions[0] - raznp;
                                     StickerController sc = newSticker.GetComponent<StickerController>();
                                     sc.setStickerInfo(stickers[j]);
 
