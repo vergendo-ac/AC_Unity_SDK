@@ -6797,7 +6797,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: RESTART
+  m_Text: RIAVVIO
 --- !u!222 &515611274
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -18009,6 +18009,7 @@ MonoBehaviour:
   - {fileID: 1911243832}
   - {fileID: 2105640884}
   - {fileID: 26680837}
+  startARButton: {fileID: 1520692464}
   sliderGO: {fileID: 2667764561382336090}
   locateButton: {fileID: 1520692464}
   lowPanelButtons: {fileID: 1285292017}

@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
 
     public Text[] debugPose;
 
+    public GameObject startARButton;
     public GameObject sliderGO;
     public GameObject locateButton;
     public GameObject lowPanelButtons;
@@ -119,6 +120,12 @@ public class UIManager : MonoBehaviour
 
         aRcamera = Camera.main.gameObject;
         setLowPanelButtons(false);
+
+        if (PlayerPrefs.HasKey("NoStartAR") &&
+           (PlayerPrefs.GetInt("NoStartAR") == 1)
+		{
+			StartAR();								// start AR immediately
+        }
     }
 
     // Update is called once per frame
@@ -132,6 +139,20 @@ public class UIManager : MonoBehaviour
         }
 
         debugPose[15].text = DateTime.UtcNow.ToString();  //DateTime.Now.ToString();
+    }
+
+    public void StartAR() 
+    {
+        startARButton.SetActive(false);
+        setLocalizeProgress(true);
+        introMessagePanel.SetActive(false);
+        StartCoroutine(StartARC());
+    }
+
+    IEnumerator StartARC()
+    {
+        yield return new WaitForEndOfFrame();
+        gph.startLocalization();
     }
 
     public void HideSettingsPanel()
