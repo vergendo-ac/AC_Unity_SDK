@@ -30,10 +30,11 @@ namespace ServerUrlsNs
         const string iosPathPart = "/ios/bundle";
         const string androidPathPart = "/android/bundle";
 #if UNITY_IOS
-        string osPart = iosPathPart;
-#endif
-#if PLATFORM_ANDROID
-        string osPart = androidPathPart;
+        const string osPart = iosPathPart;
+#elif UNITY_ANDROID
+        const string osPart = androidPathPart;
+#else
+        const string osPart = "/uwp/bundle";
 #endif
 
         public string GetMediaURL(string assetId)
