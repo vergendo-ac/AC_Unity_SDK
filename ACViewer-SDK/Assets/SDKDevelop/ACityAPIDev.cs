@@ -280,10 +280,15 @@ public class ACityAPIDev : MonoBehaviour
                     }
                 }
                 Debug.Log("Config number: " + needConfigurationNumber);
+
+                /*  TODO: Setting the camera configuration in ARCore causes no frame to be taken. 
+                 *  We need to find a way to choose the right time to set the configuration
+                   
                 // Get that configuration by index
                 var configuration = configurations[needConfigurationNumber];
                 // Make it the active one
                 m_CameraManager.currentConfiguration = configuration;
+                */
             }
 #endif
             PlayerPrefs.SetInt("config", needConfigurationNumber);
@@ -320,9 +325,12 @@ public class ACityAPIDev : MonoBehaviour
             var buffer = new NativeArray<byte>(size, Allocator.Temp);
 
             // Extract the image data
-
             image.Convert(conversionParams, new IntPtr(buffer.GetUnsafePtr()), buffer.Length);
-            Debug.Log("buffer.Length = " + buffer.Length);
+
+            Debug.Log("CamGetFrame: buf.len=" + buffer.Length);
+            Debug.Log("Frame: X = " + image.width + ", Y = " + image.height);
+            uim.statusDebug("Frame " + image.width + "x" + image.height);
+
             // The image was converted to RGBA32 format and written into the provided buffer
             // so we can dispose of the CameraImage. We must do this or it will leak resources.
             image.Dispose();
@@ -965,7 +973,7 @@ public class ACityAPIDev : MonoBehaviour
 
     public void ARLocation(Action<string, Transform, StickerInfo[]> getStickers)
     {
-        if (!configurationSetted) SetCameraConfiguration();
+        //if (!configurationSetted) SetCameraConfiguration();
         getStickersAction = getStickers;
 
         StartCoroutine(Locate(firstLocalization));  // always obtain the position and then the localization is called
