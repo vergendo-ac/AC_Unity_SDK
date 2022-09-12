@@ -26,17 +26,16 @@ public class ZoneController : MonoBehaviour
 
     public class PlaceInfo
     {
-        public string placeName;
+        public Zone   zone;                         // zone params
+        public string placeName;                    // zone name
+        // aux zone params
         public string skin;
         public string noInstructions;
         public string noStartAR;
-        public Zone zone;
 
-        public PlaceInfo(string pl, string sk, string ni, string na, string lat, string lon, string rad) {
-            this.placeName      = pl;
-            this.skin           = sk;
-            this.noInstructions = ni;
-            this.noStartAR      = na;
+        public PlaceInfo(string pl, string lat = null, string lon = null, string rad = null)
+        {
+            placeName = pl;
             zone = new Zone(lat, lon, rad);
         }
     }
@@ -189,51 +188,49 @@ public class ZoneController : MonoBehaviour
         }
     }
 
-    public void ReloadScene()
-    {
-        SceneManager.LoadScene(0);
-    }
-
     void AppParamsParser(string jsonS)
     {
         var jsonParse = JSON.Parse(jsonS);
-        string pl, sk, ni, na, la, lo, ra;
-        int objectsAmount = -1;
+        string pl, la, lo, ra;
+        int count = -1;
         List<PlaceInfo> placeInfoList = new List<PlaceInfo>();
         do
         {
-            objectsAmount++;
-            pl = jsonParse[objectsAmount]["place"];
-            sk = jsonParse[objectsAmount]["skin"];
-            ni = jsonParse[objectsAmount]["no_instructions"];
-            na = jsonParse[objectsAmount]["no_start-AR"];
-            la = jsonParse[objectsAmount]["zone"]["latitude"];
-            lo = jsonParse[objectsAmount]["zone"]["longitude"];
-            ra = jsonParse[objectsAmount]["zone"]["radius_km"];
-
-            if (pl != null || ra != null)
+            count++;
+            pl = jsonParse[count]["place"];
+            la = jsonParse[count]["zone"]["latitude"];
+            lo = jsonParse[count]["zone"]["longitude"];
+            ra = jsonParse[count]["zone"]["radius_km"];
+            if (pl != null || (la != null && lo != null))
             {
-                PlaceInfo newPlace = new PlaceInfo(pl, sk, ni, na, la, lo, ra);
-                placeInfoList.Add(newPlace);
-            }
-            Debug.Log("AppParamsParser: node[" + objectsAmount + "] - " + pl);
-        } while (pl != null);
+                PlaceInfo newPlace = new PlaceInfo(pl, la, lo, ra);
 
-        Debug.Log("AppParamsParser: #nodes = " + placeInfoList.Count);
+                newPlace.skin           = jsonParse[count]["skin"];
+                newPlace.noInstructions = jsonParse[count]["no_instructions"];
+                newPlace.noStartAR      = jsonParse[count]["no_start-AR"];
+				
+                placeInfoList.Add(newPlace);
+
+				Debug.Log("AppParamsParser: zone[" + count + "] - " + placeInfoList[count]);
+            } else
+				break;
+        } while (true);
+		
+        Debug.Log("AppParamsParser: #zones = " + placeInfoList.Count);
 
         DoCheckLocation(placeInfoList.ToArray());
     }
 
     public void DoCheckLocation(PlaceInfo[] places)
     {
-        PlaceInfo rPlace = null;   					// the right place just within a zone
-        PlaceInfo oPlace = null;   					// other place as a separate zone "all other places", outside of all other zones
+        PlaceInfo rPlace = null;                    // the right place just within a zone
+        PlaceInfo oPlace = null;                    // other place as a separate zone "all other places", outside of all other zones
         System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
         for (int i = 0; i < places.Length; i++) 
         {
             if (places[i].placeName.ToLower().Contains("all ") ||
-				string.IsNullOrEmpty(places[i].zone.radiusKm))
+                string.IsNullOrEmpty(places[i].zone.radiusKm))
             {
                 oPlace = places[i];
                 Debug.Log("DoCheckLocation: found oPlace=" + oPlace.placeName + ", [" + i + "]");
@@ -258,29 +255,30 @@ public class ZoneController : MonoBehaviour
 
         if (rPlace != null)
         {
-            SetPlace(rPlace);						// we found zone that fits the current location
+            SetPlace(rPlace);                       // we found zone that fits the current location
         }
         else if (oPlace != null) 
         { 
-            SetPlace(oPlace); 						// we found zone that fits the current location, outside of all others
+            SetPlace(oPlace);                       // we found zone that fits the current location, outside of all others
         }
         else if (places.Length >= 1)                // if there're at least one entry, which doesn't fit the current location
         { 
-			SetNotInPlace();
+            SetNotInPlace();
         }
-		else
-		{
-            PlaceInfo defPlace = new PlaceInfo("", "", "", "", "", "", "");
-            SetPlace(defPlace);						// the file has no zones, activate default params
-		}
+        else
+        {
+            PlaceInfo defParams = new PlaceInfo("");
+            SetPlace(defParams);                    // the file has no zones, activate default params
+        }
 
+        // Finally set UI panels in according to the params
         uispc.SetZoneControllerUI();
     }
 
     void SetNotInPlace()
     {
         PlayerPrefs.SetInt("NotInPlace", 1);
-	}
+    }
 
     void SetPlace(PlaceInfo place) 
     {
@@ -288,14 +286,14 @@ public class ZoneController : MonoBehaviour
 
         if (!string.IsNullOrEmpty(place.skin))
         {
-			PlayerPrefs.SetString("skin", place.skin);
+            PlayerPrefs.SetString("skin", place.skin);
         }
-		else
-		{
+        else
+        {
             PlayerPrefs.SetString("skin", "");
-		}
+        }
 
-        if (place.noStartAR.Equals("1"))
+        if (!string.IsNullOrEmpty(place.noStartAR) && place.noStartAR.Equals("1"))
         {
             PlayerPrefs.SetInt("NoStartAR", 1);
         }
@@ -304,7 +302,7 @@ public class ZoneController : MonoBehaviour
             PlayerPrefs.SetInt("NoStartAR", 0);
         }
 
-        if (place.noInstructions.Equals("1"))
+        if (!string.IsNullOrEmpty(place.noInstructions) && place.noInstructions.Equals("1"))
         {
             PlayerPrefs.SetInt("Instruction", 0);
             StartCoroutine(StartARScene());
@@ -319,5 +317,10 @@ public class ZoneController : MonoBehaviour
     {
         yield return new WaitForEndOfFrame();
         SceneManager.LoadScene(1);
+    }
+
+    public void ReloadScene()
+    {
+        SceneManager.LoadScene(0);
     }
 }

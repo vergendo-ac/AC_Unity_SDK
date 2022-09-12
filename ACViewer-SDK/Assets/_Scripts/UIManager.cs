@@ -122,7 +122,7 @@ public class UIManager : MonoBehaviour
         setLowPanelButtons(false);
 
         if (PlayerPrefs.HasKey("NoStartAR") &&
-           (PlayerPrefs.GetInt("NoStartAR") == 1)
+           (PlayerPrefs.GetInt("NoStartAR") == 1))
 		{
 			StartAR();								// start AR immediately
         }
@@ -189,8 +189,8 @@ public class UIManager : MonoBehaviour
     {
         Debug.Log("Reload active scene started");
         AssetBundle.UnloadAllAssetBundles(true);
+		// load scene that was active before
         SceneManager.LoadScene(SceneManager.GetActiveScene().name, LoadSceneMode.Single);
-        //Application.LoadLevel("AugCityDebug");
     }
 
     public void setHint(Text tt)
