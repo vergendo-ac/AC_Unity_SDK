@@ -11,6 +11,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
     public GameObject cantLocalizeImage;
     public GameObject localizedImage;
     public GameObject videoPref;
+    public GameObject button3DPrefab;
     public GameObject stickerPref;
     public GameObject stickerFood;
     public GameObject stickerPlace;
@@ -259,6 +260,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                  (stickers[j].sPath != null &&
                                   stickers[j].sPath.Contains("3dobject"))       // oldest 3d object format
                                 );
+                            
+                            bool is3DButton = !isVideoSticker &&
+                                (stickers[j].type.ToLower().Contains("image")        ||   // new imagesticker type
+                                 stickers[j].sSubType.ToLower().Contains("3dbutton") ||
+                                 stickers[j].sSubType.ToLower().Contains("image"));
 
                             bool is3dModelTransfer =
                                 stickers[j].sDescription.ToLower().Contains("transfer") ||
@@ -271,6 +277,24 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 vidos.source = VideoSource.Url;
                                 vidos.url = stickers[j].sPath;
                                 videoURLs.Add(urlVid);
+                            }
+                            else if (is3DButton)
+                            {
+                                GameObject threeDButton = Instantiate(button3DPrefab, placeHolderParent.transform);
+                                //threeDButton.transform.position = vp.transform.position;
+                                //threeDButton.transform.rotation = vp.transform.rotation;
+                                threeDButton.transform.localPosition = stickers[j].mainPositions;
+                                threeDButton.transform.localRotation = new Quaternion(
+                                    stickers[j].orientations.x,
+                                    stickers[j].orientations.y,
+                                    stickers[j].orientations.z,
+                                    stickers[j].orientations.w);
+                                ButtonImageLoader btnLoader = threeDButton.GetComponentInChildren<ButtonImageLoader>();
+                                btnLoader.source    = stickers[j].source;
+                                btnLoader.height    = stickers[j].height;
+                                btnLoader.width     = stickers[j].width;
+                                btnLoader.stickerId = stickers[j].objectId;
+                                btnLoader.SetRawImage(stickers[j].sPath);
                             }
                             else if (is3dModel || is3dModelTransfer)    // 3d object or special navi object
                             {
