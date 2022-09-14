@@ -17880,6 +17880,8 @@ MonoBehaviour:
   localizedImage: {fileID: 137926580}
   videoPref: {fileID: 555716037390048018, guid: 20698868cbbc3d141a03dc6d8780cb66,
     type: 3}
+  button3DPrefab: {fileID: 2681117211889732851, guid: 8729117e53065114cb69cf27bba41abb,
+    type: 3}
   stickerPref: {fileID: 3864521464477872071, guid: 02c4300a28c9e7a4593b87515637fa4c,
     type: 3}
   stickerFood: {fileID: 4421731877180579480, guid: 8bff8b95487f83a4b8a53b5d4615235e,

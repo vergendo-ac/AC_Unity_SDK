@@ -97,6 +97,9 @@ public class ACityAPIDev : MonoBehaviour
         public bool   vertical;
         public string type;
         public string subType;
+        public string source;
+        public string height;
+        public string width;
 
         public bool   navmesh;
         public bool   transfer;       
@@ -467,6 +470,10 @@ public class ACityAPIDev : MonoBehaviour
                                     stickers[j].subType           = "" + jsonParse["objects"][x]["sticker"]["subtype"];
                                     stickers[j].type              = "" + jsonParse["objects"][x]["sticker"]["type"];
                                     stickers[j].bundleName        = "" + jsonParse["objects"][x]["sticker"]["model_id"];
+                                    stickers[j].source            = "" + jsonParse["objects"][x]["sticker"]["source"];
+                                    stickers[j].height            = "" + jsonParse["objects"][x]["sticker"]["height"];
+                                    stickers[j].width             = "" + jsonParse["objects"][x]["sticker"]["width"];
+
                                     if (string.IsNullOrEmpty(stickers[j].bundleName))
                                     {
                                         stickers[j].bundleName    = "" + jsonParse["objects"][x]["sticker"]["bundle_name"];
@@ -502,6 +509,9 @@ public class ACityAPIDev : MonoBehaviour
                                     currentRi.stickerArray[j].subType           = stickers[j].subType;
                                     currentRi.stickerArray[j].type              = stickers[j].type;
                                     currentRi.stickerArray[j].bundleName        = stickers[j].bundleName;
+                                    currentRi.stickerArray[j].source            = stickers[j].source;
+                                    currentRi.stickerArray[j].height            = stickers[j].height;
+                                    currentRi.stickerArray[j].width             = stickers[j].width;
                                 }
                             }
                         }
@@ -859,6 +869,10 @@ public class ACityAPIDev : MonoBehaviour
                             stickers[j].subType            = "" + jsonParse["scrs"][j]["content"]["custom_data"]["subtype"];
                             stickers[j].type               = "" + jsonParse["scrs"][j]["content"]["custom_data"]["type"];
                             stickers[j].bundleName         = "" + jsonParse["scrs"][j]["content"]["custom_data"]["model_id"];
+                            stickers[j].source             = "" + jsonParse["scrs"][j]["content"]["custom_data"]["source"];
+                            stickers[j].height             = "" + jsonParse["scrs"][j]["content"]["custom_data"]["height"];
+                            stickers[j].width              = "" + jsonParse["scrs"][j]["content"]["custom_data"]["width"];
+
                             if (string.IsNullOrEmpty(stickers[j].bundleName)) {
                                 stickers[j].bundleName     = "" + jsonParse["scrs"][j]["content"]["custom_data"]["bundle_name"];
                             }
@@ -893,7 +907,11 @@ public class ACityAPIDev : MonoBehaviour
                             currentRi.stickerArray[j].subType           = stickers[j].subType;
                             currentRi.stickerArray[j].type              = stickers[j].type;
                             currentRi.stickerArray[j].bundleName        = stickers[j].bundleName;
+                            currentRi.stickerArray[j].source            = stickers[j].source;
+                            currentRi.stickerArray[j].height            = stickers[j].height;
+                            currentRi.stickerArray[j].width             = stickers[j].width;
                         }
+
                         recoList.Add(currentRi);
                         newCam.transform.position    = cameraPositionInLocalization;
                         newCam.transform.eulerAngles = cameraRotationInLocalization;
