@@ -4,7 +4,6 @@ using UnityEngine;
 
 namespace ServerUrlsNs
 {
-
     [System.Serializable]
     public class ServerURLs
     {
@@ -14,29 +13,26 @@ namespace ServerUrlsNs
         public  int CustomUrlId => CustomUrlIndex + 1;
         public  int CustomUrlIndex = 12;
 
-        public  string LocalizerURL => CurAPIUrl + "/api/localizer/localize";  //"https://developer.augmented.city/api/localizer/localize";
+        public  string LocalizerURL => CurAPIUrl + "/api/localizer/localize";
 
         const string CustomUrlKey = "ApiUrl";
         const string UrlIdKey = "Tnumber";
 
         public int CurUrlId = defaultUrlId;
         public int CurUrlIndex => CurUrlId - 1;
-        public string CurAPIUrl => URLsArr[CurUrlIndex];
+        public string CurAPIUrl => URLsArr[CurUrlIndex];    // "https://developer.augmented.city";
 
-        /*
-          BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/" + ABName + "/ios/bundle";
-          BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/" + ABName + "/android/bundle";
-        */
-        const string iosPathPart = "/ios/bundle";
-        const string androidPathPart = "/android/bundle";
 #if UNITY_IOS
-        const string osPart = iosPathPart;
+        const string osPart = "/ios/bundle";
 #elif UNITY_ANDROID
-        const string osPart = androidPathPart;
+        const string osPart = "/android/bundle";
 #else
         const string osPart = "/uwp/bundle";
 #endif
 
+        /*
+          BundleFullURL = PlayerPrefs.GetString("ApiUrl") + "/media/3d/" + ABName + "/ios/bundle";
+        */
         public string GetMediaURL(string assetId)
         {
             string ret = CurAPIUrl + @"/media/3d/" + assetId + osPart;

@@ -36,7 +36,8 @@ public class SetupServersBtn : MonoBehaviour
         }
     }
 
-    public void CheckPassword(InputField ifield) {
+    public void CheckPassword(InputField ifield)
+    {
         if (ifield.text.Contains(pass)) 
         {
             passwordPanel.SetActive(false);
@@ -45,7 +46,9 @@ public class SetupServersBtn : MonoBehaviour
         }
     }
 
-    void OpenChangeServerPanel() {
+    void OpenChangeServerPanel()
+    {
         panel.gameObject.SetActive(true);
     }
+
 }

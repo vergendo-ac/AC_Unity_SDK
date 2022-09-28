@@ -503,12 +503,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
             timerRelocation = timerRelocation - Time.fixedDeltaTime;
             if ((timerRelocation < 0) && relocationCompleted)
             {
-                if (acapi.editorTestMode) {
-                    startDevLocation();
-                }
-                else {
-                    startLocalization();
-                }
+                Localize();
                 timerRelocation = timeForRelocation;
             }
 
@@ -522,6 +517,17 @@ public class GetPlaceHoldersDev : MonoBehaviour
         }
     }
 
+    public void Localize()
+    {
+        if (acapi.editorTestMode)
+        {
+            startDevLocation();
+        }
+        else
+        {
+            startLocalization();
+        }
+    }
 
     public List<GameObject> GetAllStickers() {
         return stickerObjects;
