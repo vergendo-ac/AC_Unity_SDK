@@ -215,10 +215,22 @@ MonoBehaviour:
   m_HideMobileInput: 0
   m_CharacterValidation: 1
   m_CharacterLimit: 100
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnDidEndEdit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1396039693}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: setRelocationTimer
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 466187822}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Text, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnValueChanged:
@@ -2452,10 +2464,22 @@ MonoBehaviour:
   m_HideMobileInput: 0
   m_CharacterValidation: 1
   m_CharacterLimit: 100
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnDidEndEdit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1396039693}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: setRelocationTimer
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1913884614}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Text, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnValueChanged:
@@ -3525,10 +3549,22 @@ MonoBehaviour:
   m_HideMobileInput: 0
   m_CharacterValidation: 1
   m_CharacterLimit: 100
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnDidEndEdit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1396039693}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: setRelocationTimer
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 602476231}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Text, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnValueChanged:
@@ -7779,10 +7815,22 @@ MonoBehaviour:
   m_HideMobileInput: 0
   m_CharacterValidation: 0
   m_CharacterLimit: 40
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnDidEndEdit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1396039693}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: setHint
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1110855442}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Text, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnValueChanged:
@@ -15383,10 +15431,22 @@ MonoBehaviour:
   m_HideMobileInput: 0
   m_CharacterValidation: 0
   m_CharacterLimit: 40
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnDidEndEdit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1396039693}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: setGpsHint
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1184284939}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Text, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnValueChanged:
@@ -25584,10 +25644,22 @@ MonoBehaviour:
   m_HideMobileInput: 0
   m_CharacterValidation: 1
   m_CharacterLimit: 100
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnDidEndEdit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1396039693}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: setRelocationTimer
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 633500485}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Text, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnValueChanged:
@@ -29023,10 +29095,22 @@ MonoBehaviour:
   m_HideMobileInput: 0
   m_CharacterValidation: 1
   m_CharacterLimit: 0
-  m_OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
   m_OnDidEndEdit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: 
+        m_MethodName: SetSliderMax
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  m_OnSubmit:
     m_PersistentCalls:
       m_Calls: []
   m_OnValueChanged:
