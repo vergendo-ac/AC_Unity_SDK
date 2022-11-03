@@ -6,6 +6,12 @@ using UnityEngine.Video;
 
 public class GetPlaceHoldersDev : MonoBehaviour
 {
+    public class RecoPose
+    {
+        public Vector3 pos;
+        public Quaternion ori;
+    }
+
     public GameObject dot;
     public GameObject linePrefab;
     public GameObject cantLocalizeImage;
@@ -44,6 +50,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
     float animationTime = 2f;
     UIManager uim;
     GameObject activeReco, modelToServer;
+    RecoFilter recoFilter => RecoFilter.Instance();
 
     public TextAsset cloudAsset;
     GameObject pcloud;
@@ -53,7 +60,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
 
     bool  firstStart      = true;                   // flag if it's first loca is active
     float cantLocTimerDef = 30f;                    // set loca timeout default value to 30 secs
-    float cantLocTimer;                             
+    float cantLocTimer;
 
     void Start()
     {
@@ -429,11 +436,14 @@ public class GetPlaceHoldersDev : MonoBehaviour
                 placeHolderParent.transform.SetParent(scaleParent.transform);
                 recos.Add(placeHolderParent);  // store processed scene into the cache
                 uim.Located();
-
+                setTimeForRelocation(RecoFilter.StartFilterRelTimer);
                 relocationCompleted = true;
             }
             else // if (placeHolderParent == null)
             {
+                placeHolderParent.SetActive(true);
+                recoFilter.FilterStart(placeHolderParent, zeroP.transform, arCamCoordinates, animationTime, Translocation);
+                /*
                 Transform scaleParentTransform = placeHolderParent.transform.root;
                 //if (needScaling && lastLocalizedRecoId.Contains(id)) {}
                 placeHolderParent.SetActive(true);
@@ -449,6 +459,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
                 Translocation(placeHolderParent, tempBiasVector.transform, animationTime);
                 Destroy(tempScaler);
                 Destroy(tempBiasVector);
+                */
             }
 
             lastLocalizedRecoId = id;
@@ -501,6 +512,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
         if (ARStarted)
         {
             timerRelocation = timerRelocation - Time.fixedDeltaTime;
+            uim.debugPose[20].text = "NxtReloc:" + Mathf.RoundToInt(timerRelocation);
             if ((timerRelocation < 0) && relocationCompleted)
             {
                 Localize();
@@ -664,5 +676,15 @@ public class GetPlaceHoldersDev : MonoBehaviour
 
     public string getCurrentRecoId() {
         return lastLocalizedRecoId;
+    }
+
+    public void SetRelocationState(bool relocationState)
+    {
+        relocationCompleted = relocationState;
+    }
+
+    private void OnDestroy()
+    {
+        recoFilter.OnReloadScene();
     }
 }
