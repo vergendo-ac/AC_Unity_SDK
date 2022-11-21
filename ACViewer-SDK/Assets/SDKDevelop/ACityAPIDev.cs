@@ -286,7 +286,7 @@ public class ACityAPIDev : MonoBehaviour
 
                 /*  TODO: Setting the camera configuration in ARCore causes no frame to be taken. 
                  *  We need to find a way to choose the right time to set the configuration
-                   
+
                 // Get that configuration by index
                 var configuration = configurations[needConfigurationNumber];
                 // Make it the active one
@@ -332,7 +332,7 @@ public class ACityAPIDev : MonoBehaviour
 
             Debug.Log("CamGetFrame: buf.len=" + buffer.Length);
             Debug.Log("Frame: X = " + image.width + ", Y = " + image.height);
-            uim.statusDebug("Frame " + image.width + "x" + image.height);
+            uim.statusDebug("GOT cam frame X=" + image.width + ", Y=" + image.height);
 
             // The image was converted to RGBA32 format and written into the provided buffer
             // so we can dispose of the CameraImage. We must do this or it will leak resources.
@@ -366,17 +366,19 @@ public class ACityAPIDev : MonoBehaviour
         int objectsAmount = -1;
         string js, sessionId;
 
+        Debug.Log("+++camLocalize");
+
         if (!geopose)
         {
             if (jsonParse["camera"] != null)
             {
                 sessionId = jsonParse["reconstruction_id"];
-                // Debug.Log("sessioID: " + sessionId);
+                //Debug.Log("sessioID: " + sessionId);
                 do
                 {
                     objectsAmount++;
                     js = jsonParse["placeholders"][objectsAmount]["placeholder_id"];
-                    // Debug.Log("js node [" + objectsAmount + "]  - " + js);
+                    //Debug.Log("js node [" + objectsAmount + "]  - " + js);
                 } while (js != null);
 
                 Debug.Log("nodeAmount = " + objectsAmount + ", recoArray.Len = " + recoList.Count);
@@ -578,18 +580,24 @@ public class ACityAPIDev : MonoBehaviour
                     newCam.transform.eulerAngles = cameraRotationInLocalization;
                 }
                 currentRi.lastCamCoordinate = new Vector3(px, py, pz);
+
                 localizationStatus = LocalizationStatus.Ready;
+
                 uim.statusDebug("Localized");
+		        Debug.Log("camLocalize: +++getStickersAction");
                 getStickersAction(currentRi.id, zeroCoord.transform, stickers);
+		        Debug.Log("camLocalize: ---getStickersAction");
+                uim.statusDebug("Parsed");
+
                 Destroy(newCam);
             }
             else
             {
                 Debug.Log("Can't localize");
                 uim.statusDebug("Can't localize");
-
                 localizationStatus = LocalizationStatus.CantLocalize;
                 uim.setDebugPose(0, 0, 0, 0, 0, 0, 0, "cant loc");
+
                 getStickersAction(null, null, null);
             }
         }
@@ -688,12 +696,12 @@ public class ACityAPIDev : MonoBehaviour
                         zeroGeoCam = currentRi.zeroCamGeoPose;
                     }
                     Vector3 enupose = EcefToEnu(GeodeticToEcef(camLat, camLon, camHei), zeroGeoCam.lat, zeroGeoCam.lon, zeroGeoCam.h);
-                    Debug.Log("Cam GEO enupose x = " + enupose.x + ", y = " + enupose.y + ", z = " + enupose.z);
+                    //Debug.Log("Cam GEO enupose x = " + enupose.x + ", y = " + enupose.y + ", z = " + enupose.z);
 
                     px = enupose.x;
                     py = enupose.y;
                     pz = enupose.z;
-                    Debug.Log("geo.quat = " + ox + "--" + oy + "--" + oz + "--" + ow);
+                    //Debug.Log("geo.quat = " + ox + "--" + oy + "--" + oz + "--" + ow);
                     if (currentRi == null)
                         uim.setDebugPose(0.001f, py, pz, ox, oy, oz, ow, debugSessionId);
                     else
@@ -729,11 +737,11 @@ public class ACityAPIDev : MonoBehaviour
                 {
                     uPose.SetCameraOriFromGeoPose(newCam);  // Add additional 2 rotations for camera
                 }
-                Debug.Log("newCam.transform.locPos pos= "
+                Debug.Log("camLocalize: newPos="
                     + newCam.transform.localPosition.x + ", "
                     + newCam.transform.localPosition.y + ", "
                     + newCam.transform.localPosition.z);
-                Debug.Log("newCam.transform.locRot ang= " + newCam.transform.localRotation.eulerAngles);
+                Debug.Log("camLocalize: newRot=" + newCam.transform.localRotation.eulerAngles);
 
                 GameObject zeroCoord = new GameObject("Zero");
                 zeroCoord.transform.SetParent(newCam.transform);
@@ -974,8 +982,13 @@ public class ACityAPIDev : MonoBehaviour
                 }
                 currentRi.lastCamCoordinate = new Vector3(px, py, pz);
                 localizationStatus = LocalizationStatus.Ready;
+
                 uim.statusDebug("Localized");
+		        Debug.Log("camLocalize: +++getStickersAction");
                 getStickersAction(currentRi.id, zeroCoord.transform, stickers);
+		        Debug.Log("camLocalize: ---getStickersAction");
+                uim.statusDebug("Parsed");
+
                 Destroy(newCam);
             }
             else
@@ -984,9 +997,12 @@ public class ACityAPIDev : MonoBehaviour
                 uim.statusDebug("Cant localize");
                 localizationStatus = LocalizationStatus.CantLocalize;
                 uim.setDebugPose(0, 0, 0, 0, 0, 0, 0, "cant loc");
+
                 getStickersAction(null, null, null);
             }
         }
+
+        Debug.Log("---camLocalize");
     }
 
     public void ARLocation(Action<string, Transform, StickerInfo[]> getStickers)
@@ -1005,10 +1021,12 @@ public class ACityAPIDev : MonoBehaviour
     }
 
     /// <summary>
-    /// Performs localization with the given position data and the action like the result obtaining. It's the first in Editor mode.
+    /// Performs localization with the given position data and the action like the result obtaining.
+    /// It's the first in Editor mode.
     /// </summary>
     public void firstLocalization(float langitude, float latitude, float hdop, string path, Action<string, Transform, StickerInfo[]> getStickers)
     {
+        Debug.Log("+++firstLocalization");
         byte[] bjpg;
         string framePath;
         if (editorTestMode)
@@ -1019,7 +1037,9 @@ public class ACityAPIDev : MonoBehaviour
         }
         else
         {
+            Debug.Log("firstLocalization: get frame");
             bjpg = CamGetFrame();
+            Debug.Log("firstLocalization: got frame");
             if (bjpg == null)
             {
                 Debug.Log("Frame has got NULL!!!");
@@ -1034,9 +1054,11 @@ public class ACityAPIDev : MonoBehaviour
         cameraPositionInLocalization = ARCamera.transform.position;
         if (bjpg != null)
         {
-            Debug.Log($"ACityAPIDev::firstLocalization has apiURL = {apiURL}");
+            Debug.Log($"ACityAPIDev::firstLocalization apiURL = {apiURL}");
             uploadFrame(bjpg, apiURL, langitude, latitude, hdop, camLocalize);
         }
+
+        Debug.Log("---firstLocalization");
     }
 
 
@@ -1059,18 +1081,18 @@ public class ACityAPIDev : MonoBehaviour
 
     public void uploadFrame(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
     {
-        if (!useOSCP)
-        {
+        if (!useOSCP) {
             StartCoroutine(UploadJPGwithGPS(bytes, apiURL, langitude, latitude, hdop, getJsonCameraObjects));
         }
-        else StartCoroutine(UploadJPGwithGPSOSCP(bytes, apiURL, langitude, latitude, hdop, getJsonCameraObjects));
+        else {
+            StartCoroutine(UploadJPGwithGPSOSCP(bytes, apiURL, langitude, latitude, hdop, getJsonCameraObjects));
+        }
     }
 
     IEnumerator UploadJPGwithGPSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
     {
+        Debug.Log("UploadGEO: buf.len=" + bytes.Length);
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
-        //  byte[] bytes = File.ReadAllBytes(filePath);
-        Debug.Log("nBytes: " + bytes.Length);
         rotationDevice = "90";
         if (!editorTestMode)
         {
@@ -1078,9 +1100,8 @@ public class ACityAPIDev : MonoBehaviour
             if (Input.deviceOrientation == DeviceOrientation.PortraitUpsideDown) { rotationDevice = "90"; }
         }
 
-        //  string shot = System.Text.Encoding.UTF8.GetString(bytes);
+        //string shot = System.Text.Encoding.UTF8.GetString(bytes);
         string shot = Convert.ToBase64String(bytes);
-        // Debug.Log("Uploading Screenshot started...");
 
         string finalJson = "{\"id\":\"9089876676575754\",\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"type\":\"geopose\",\"sensors\":[{\"id\":\"0\",\"type\":\"camera\"},{\"id\":\"1\",\"type\":\"geolocation\"}],\"sensorReadings\":[{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"0\",\"reading\":{\"sequenceNumber\":0,\"imageFormat\":\"JPG\",\"imageOrientation\":{\"mirrored\":false,\"rotation\":"+ rotationDevice +"},\"imageBytes\":\"" + shot + "\"}},{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"1\",\"reading\":{\"latitude\":" + langitude + ",\"longitude\":" + latitude + ",\"altitude\":0" + ",\"accuracy\":" + hdop + "}}]}";
         Debug.Log("finalJson OSCP = " + finalJson);
@@ -1199,7 +1220,7 @@ public class ACityAPIDev : MonoBehaviour
         byte[] boundary = UnityWebRequest.GenerateBoundary();
         string targetURL = apiURL + "/api/localizer/localize";
         Debug.Log(targetURL);
-        var w = UnityWebRequest.Post(apiURL + "/api/localizer/localize", form, boundary);
+        var w = UnityWebRequest.Post(targetURL, form, boundary);
       //w.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");  //FixMe: it was open in ACV, check it?
         w.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
         w.SetRequestHeader("user-agent", "Unity ACO, Device: " + SystemInfo.deviceModel);

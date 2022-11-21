@@ -197,13 +197,14 @@ public class UIManager : MonoBehaviour
     {
         PlayerPrefs.SetString("hint", tt.text);
         placeholderHint.text = PlayerPrefs.GetString("hint");
+        Debug.Log("setHint() =" + PlayerPrefs.GetString("hint"));
     }
 
     public void setGpsHint(Text tt)
     {
         PlayerPrefs.SetString("gpshint", tt.text);
         placeholderGpsHint.text = PlayerPrefs.GetString("gpshint");
-        Debug.Log("gpshint " + PlayerPrefs.GetString("gpshint"));
+        Debug.Log("setGpsHint() =" + PlayerPrefs.GetString("gpshint"));
     }
 
 
@@ -302,6 +303,7 @@ public class UIManager : MonoBehaviour
 
     public void setLocalizeProgress(bool act)
     {
+        Debug.Log("UI.setLocalizeProgress(" + act + ")");
         localizeProgress.SetActive(act);
     }
 
@@ -312,7 +314,7 @@ public class UIManager : MonoBehaviour
 
     public void SetServ(Text tt)
     {
-        Debug.Log("Serv  = " + tt.text);
+        Debug.Log("UI.SetServ() =" + tt.text);
         PlayerPrefs.SetString("ApiUrl", tt.text);
     }
 
@@ -343,7 +345,7 @@ public class UIManager : MonoBehaviour
         }
         else
         {
-            debugPose[0].text = "Cant Localize ";
+            debugPose[0].text = "Can't localize";
             debugPose[1].text = "yc = " + 0;
             debugPose[2].text = "zc = " + 0;
             debugPose[3].text = "xo = " + 0;
@@ -361,7 +363,7 @@ public class UIManager : MonoBehaviour
     {
         debugPose[10].text = "lat = " + lat;
         debugPose[11].text = "lon = " + lon;
-        debugPose[14].text = "hdop= " + hdop;
+        debugPose[14].text = "hdp = " + hdop;
     }
 
     public void planeDebug(float yplane)
@@ -382,7 +384,9 @@ public class UIManager : MonoBehaviour
             if (ecef)          debugPose[16].text = "ECEF";
             if (geo)           debugPose[16].text = "Geopose";
         }
-        else debugPose[16].text = "Local";
+        else {
+            debugPose[16].text = "Local";
+        }
     }
 
     public void ClearCache()

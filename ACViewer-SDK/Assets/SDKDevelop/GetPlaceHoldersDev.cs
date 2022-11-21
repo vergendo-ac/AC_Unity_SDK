@@ -136,9 +136,13 @@ public class GetPlaceHoldersDev : MonoBehaviour
     public void startLocalization()
     {
         pastArCamCoordinates = arCamCoordinates;
-        arCamCoordinates = new Vector3(aRcamera.transform.position.x, aRcamera.transform.position.y, aRcamera.transform.position.z);
-        Debug.Log("ARcam x = " + aRcamera.transform.position.x);
+        arCamCoordinates = new Vector3(aRcamera.transform.position.x,
+                                       aRcamera.transform.position.y,
+                                       aRcamera.transform.position.z);
+        Debug.Log("startLocalization: ARcam.x=" + aRcamera.transform.position.x);
+
         acapi.ARLocation(showPlaceHolders);
+
         timerRelocation = timeForRelocation;
         ARStarted = true;
         relocationCompleted = false;
@@ -160,7 +164,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
         //1. Calculate vector product (1-2) and (2-3) that's the plane normal
         //2. Check the sign of Z normal component => if positive (parallel to Z axis), it's forward - it's reversed; otherwise - it's ok.
         Vector3 normal = GetNormal(point1, point2, point3);
-        Debug.Log("normal: x: " + normal.x + " y: " + normal.y + " z: " + normal.z);
+        //Debug.Log("normal: x: " + normal.x + " y: " + normal.y + " z: " + normal.z);
         if (normal.z > 0) {
             isReversedVideo = true;
         }
@@ -171,11 +175,9 @@ public class GetPlaceHoldersDev : MonoBehaviour
     {
         if (id != null)
         {
-            /*
-            Debug.Log("zeroPpos = " + zeroP.position.x + "    " + zeroP.position.y + "    " + zeroP.position.z);
-            Debug.Log("zeroPori = " + zeroP.eulerAngles.x + "    " + zeroP.eulerAngles.y + "    " + zeroP.eulerAngles.z);
-            */
-            firstStart = false;
+            /*Debug.Log("zeroPpos = " + zeroP.position.x + "    " + zeroP.position.y + "    " + zeroP.position.z);
+              Debug.Log("zeroPori = " + zeroP.eulerAngles.x + "    " + zeroP.eulerAngles.y + "    " + zeroP.eulerAngles.z);*/
+
             GameObject placeHolderParent;
             placeHolderParent = checkSavedID(id);
 
@@ -189,6 +191,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
             }
 
             setTimeForRelocation(PlayerPrefs.GetFloat("TimeForRelocation"));
+            firstStart = false;
 
             if (placeHolderParent == null)          // if it's first time we need to generate a new scene
             {
@@ -231,7 +234,10 @@ public class GetPlaceHoldersDev : MonoBehaviour
                         temp1.transform.position = stickers[j].positions[0];
                         //Debug.Log("temp1 -> x: " + temp1.transform.position.x + "y: " + temp1.transform.position.y + " z: " + temp1.transform.position.z);
                         GameObject temp2 = Instantiate(dot, placeHolderParent.transform);
-                        temp2.transform.position = new Vector3(stickers[j].positions[1].x, stickers[j].positions[1].y, stickers[j].positions[1].z); 
+                        temp2.transform.position =
+                            new Vector3(stickers[j].positions[1].x,
+                                        stickers[j].positions[1].y,
+                                        stickers[j].positions[1].z);
                         //Debug.Log("temp2 -> x: " + temp2.transform.position.x + "y: " + temp2.transform.position.y + " z: " + temp2.transform.position.z);
                         GameObject temp3 = Instantiate(dot, placeHolderParent.transform);
                         temp3.transform.position = stickers[j].positions[2];
@@ -242,15 +248,23 @@ public class GetPlaceHoldersDev : MonoBehaviour
                         vp.transform.SetParent(temp1.transform);
                         temp1.transform.LookAt(temp2.transform);
                         vp.transform.position = stickers[j].positions[0] - raznp;
-                        vp.transform.localEulerAngles = new Vector3(vp.transform.localEulerAngles.x, vp.transform.localEulerAngles.y + 90, vp.transform.localEulerAngles.z);
+                        vp.transform.localEulerAngles =
+                            new Vector3(vp.transform.localEulerAngles.x,
+                                        vp.transform.localEulerAngles.y + 90,
+                                        vp.transform.localEulerAngles.z);
                         vp.transform.SetParent(placeHolderParent.transform);
                         vp.transform.localEulerAngles = new Vector3(0, vp.transform.localEulerAngles.y, 0);
-                        vp.transform.localScale = (vp.transform.localScale * Vector3.Magnitude(stickers[j].positions[0] - stickers[j].positions[1]));
-                        //fix the reversed video checking the plane orientation
-                        bool isReversedVideoSticker = checkVideoOrientation(temp1.transform.position, temp2.transform.position, temp3.transform.position);
-                        Debug.Log("isReversedVideoSticker: " + isReversedVideoSticker);
+                        vp.transform.localScale = (vp.transform.localScale *
+                            Vector3.Magnitude(stickers[j].positions[0] - stickers[j].positions[1]));
+
+                        // Fix the reversed video checking the plane orientation
+                        bool isReversedVideoSticker =
+                            checkVideoOrientation(temp1.transform.position,
+                                                  temp2.transform.position,
+                                                  temp3.transform.position);
                         if (isReversedVideoSticker)
                         {
+                            Debug.Log("showPlaceHolders: reversedVideoSticker p=" + stickers[j].sPath);
                             vp.transform.localEulerAngles = new Vector3(0, vp.transform.localEulerAngles.y + 180, 0);
                         }
                         videoDemos.Add(vp);
@@ -269,7 +283,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 );
                             
                             bool is3DButton = !isVideoSticker &&
-                                (stickers[j].type.ToLower().Contains("image")        ||   // new imagesticker type
+                                (stickers[j].type.ToLower().Contains("image")        ||   // new 3d-button format
                                  stickers[j].sSubType.ToLower().Contains("3dbutton") ||
                                  stickers[j].sSubType.ToLower().Contains("image"));
 
@@ -280,6 +294,14 @@ public class GetPlaceHoldersDev : MonoBehaviour
                             if (isVideoSticker)                         // if it's a video-sticker
                             {
                                 GameObject urlVid = Instantiate(vp, placeHolderParent.transform);
+                                /*
+                                urlVid.transform.localPosition = stickers[j].mainPositions;
+                                urlVid.transform.localRotation = new Quaternion(
+                                    stickers[j].orientations.x,
+                                    stickers[j].orientations.y,
+                                    stickers[j].orientations.z,
+                                    stickers[j].orientations.w);
+                                */
                                 VideoPlayer vidos = urlVid.GetComponentInChildren<VideoPlayer>();
                                 vidos.source = VideoSource.Url;
                                 vidos.url = stickers[j].sPath;
@@ -305,7 +327,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
                             }
                             else if (is3dModel || is3dModelTransfer)    // 3d object or special navi object
                             {
-                                GameObject model = Instantiate(GetComponent<ModelManager>().ABloader, placeHolderParent.transform);
+                                // Detect bundlename first
                                 string bundleName = stickers[j].sText.ToLower();
                                 if (stickers[j].type.ToLower().Contains("3d"))      // is it new format
                                 {
@@ -314,7 +336,10 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                         bundleName = stickers[j].sText.ToLower();  // return back to default bundle name as the 'name'
                                     }
                                 }
+                                // Detect model instantiation rule
+                                GameObject model = Instantiate(GetComponent<ModelManager>().ABloader, placeHolderParent.transform);
                                 model.GetComponent<AssetLoader>().ABName = bundleName;
+                                // Detect model position
                                 model.transform.localPosition = stickers[j].mainPositions; // * acapi.tempScale3d;
                                 model.transform.localRotation = new Quaternion(
                                     stickers[j].orientations.x,
@@ -337,7 +362,8 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                 mover.objectId = stickers[j].objectId;
 
                                 if (!stickers[j].vertical ||
-                                    bundleName.Contains("nograv")) {
+                                    bundleName.Contains("nograv"))
+                                {
                                     mover.noGravity = true;
                                 }
 
@@ -352,7 +378,8 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                     bundleName.Contains("gard"))
                                 {
                                     mover.landed = true;
-                                    if (is3dModelNaviData) {
+                                    if (is3dModelNaviData)
+                                    {
                                         navigateMesh.Add(model);
                                     }
                                 }
@@ -364,9 +391,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
                                     if (stickers[j].sDescription.ToLower().Contains("transfer")) {
                                         desc = desc.Substring(9, desc.Length - 9);  // exclude starting 'Transfer:'
                                     }
-                                    Debug.Log("!!! Descs = " + desc);
                                     string[] descs = desc.Split(',');
-
                                 }
 
                                 /*Debug.Log(j + ". 3dmodel " + stickers[j].sText
@@ -436,6 +461,7 @@ public class GetPlaceHoldersDev : MonoBehaviour
                 placeHolderParent.transform.SetParent(scaleParent.transform);
                 recos.Add(placeHolderParent);  // store processed scene into the cache
                 uim.Located();
+
                 setTimeForRelocation(RecoFilter.StartFilterRelTimer);
                 relocationCompleted = true;
             }
@@ -443,23 +469,6 @@ public class GetPlaceHoldersDev : MonoBehaviour
             {
                 placeHolderParent.SetActive(true);
                 recoFilter.FilterStart(placeHolderParent, zeroP.transform, arCamCoordinates, animationTime, Translocation);
-                /*
-                Transform scaleParentTransform = placeHolderParent.transform.root;
-                //if (needScaling && lastLocalizedRecoId.Contains(id)) {}
-                placeHolderParent.SetActive(true);
-                GameObject tempScaler = new GameObject("TempScaler");
-                tempScaler.transform.position = arCamCoordinates;
-                GameObject tempBiasVector = new GameObject("TempBiasVector");
-                tempBiasVector.transform.position    = zeroP.position;
-                tempBiasVector.transform.eulerAngles = zeroP.eulerAngles;
-
-                tempBiasVector.transform.SetParent(tempScaler.transform);
-                tempScaler.transform.localScale = scaleParentTransform.localScale;
-
-                Translocation(placeHolderParent, tempBiasVector.transform, animationTime);
-                Destroy(tempScaler);
-                Destroy(tempBiasVector);
-                */
             }
 
             lastLocalizedRecoId = id;
@@ -582,6 +591,11 @@ public class GetPlaceHoldersDev : MonoBehaviour
         return relocationCompleted;
     }
 
+    public void SetRelocationState(bool relocationState)
+    {
+        relocationCompleted = relocationState;
+    }
+
     public void turnOffVideoDemos(bool setup)
     {
         videoDemosTurn = setup;
@@ -676,11 +690,6 @@ public class GetPlaceHoldersDev : MonoBehaviour
 
     public string getCurrentRecoId() {
         return lastLocalizedRecoId;
-    }
-
-    public void SetRelocationState(bool relocationState)
-    {
-        relocationCompleted = relocationState;
     }
 
     private void OnDestroy()
