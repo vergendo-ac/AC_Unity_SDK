@@ -101,6 +101,7 @@ public class RecoFilter
                     uim.debugPose[17].text = "S." + firstRecos.Count + " getframe";
                     gph.SetRelocationState(true);
                 }
+                lastCamPosition = arCamCoordinates;
             }
             else
             {
@@ -130,6 +131,7 @@ public class RecoFilter
                     if (filterDataIsGood)
                     {
                         inWorkRecos.Add(rp);
+                        lastCamPosition = arCamCoordinates;
                     }
                     if (inWorkRecos.Count == StartFilterCount)
                     {
@@ -149,7 +151,6 @@ public class RecoFilter
                 }
             }
         }
-        lastCamPosition = arCamCoordinates;
     }
 
     public GetPlaceHoldersDev.RecoPose SetDefaultObjectParent(List<GetPlaceHoldersDev.RecoPose> recosList)
