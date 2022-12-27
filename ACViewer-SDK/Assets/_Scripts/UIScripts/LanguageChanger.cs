@@ -32,6 +32,12 @@ public class LanguageChanger : MonoBehaviour
             Debug.Log("This system is in Italian. ");
             changeLanguage(1);
         }
+        if (Application.systemLanguage == SystemLanguage.Korean)
+        {
+            Debug.Log("This system is in Korean. ");
+            changeLanguage(2);
+        }
+
     }
 
     void changeLanguage(int languageNumber) 

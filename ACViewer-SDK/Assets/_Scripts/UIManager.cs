@@ -11,6 +11,23 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
+    [System.Serializable]
+    public class SkinMain
+    {
+        public string name;
+        public GameObject mainPanel;
+        public GameObject startARButton;
+        public GameObject locateButton;
+        public GameObject lowPanelButtons;
+        public GameObject menuButtons;
+        public GameObject localizeProgress;
+        public GameObject notLocalizedForSomeTime;
+        public GameObject introMessagePanel;
+    }
+
+    [SerializeField] GameObject mainSkin;
+    [SerializeField] SkinMain[] skins;
+
     GetPlaceHoldersDev gph;
 
     public Text placeholderRelocationTimer;
@@ -19,28 +36,9 @@ public class UIManager : MonoBehaviour
 
     public Text[] debugPose;
 
-    public GameObject startARButton;
-    public GameObject sliderGO;
-    public GameObject locateButton;
-    public GameObject lowPanelButtons;
-    public GameObject mapButtons;
-    public GameObject menuButtons;
-    public GameObject localizeProgress;
-    public GameObject centerImage;
-    public GameObject addButton;
-    public GameObject newObjButton;
-    public GameObject editDeletePanel;
-    public GameObject navigStickPanel;
-    public GameObject navigPathGoodPanel;
-    public GameObject navigPathFailedPanel;
-    public GameObject notLocalizedForSomeTime;
-
     public GameObject debugPanel;
     public Canvas     debugCanvas;
 
-    public GameObject newObject;
-    public GameObject introPanel;
-    public GameObject introMessagePanel;
 
     public float koefSticker;
     public float koefPin;
@@ -79,7 +77,17 @@ public class UIManager : MonoBehaviour
         stickerDeActivate = null;
         gloc = 0; bloc = 0;
 
-        if (PlayerPrefs.HasKey("TimeForRelocation"))
+        foreach (SkinMain skin in skins)
+        {
+            if (PlayerPrefs.GetString("skin").ToLower().Contains(skin.name.ToLower()))
+            {
+                mainSkin.SetActive(false);
+                skin.mainPanel.SetActive(true);
+            }
+        }
+
+
+            if (PlayerPrefs.HasKey("TimeForRelocation"))
         {
             float val = PlayerPrefs.GetFloat("TimeForRelocation");
             gph.setTimeForRelocation(val);
@@ -94,7 +102,7 @@ public class UIManager : MonoBehaviour
 
         if (PlayerPrefs.HasKey("IntroMessage"))
         {
-            introMessagePanel.SetActive(false);
+            SetIntroMessagePanel(false);
         }
         else
         {
@@ -119,7 +127,7 @@ public class UIManager : MonoBehaviour
         }
 
         aRcamera = Camera.main.gameObject;
-        setLowPanelButtons(false);
+        SetLowPanelButtons(false);
 
         if (PlayerPrefs.HasKey("NoStartAR") &&
            (PlayerPrefs.GetInt("NoStartAR") == 1))
@@ -131,24 +139,42 @@ public class UIManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (gph.GetRelocationState() && sliderOn) {
-            sliderGO.SetActive(true);
-        }
-        else {
-            sliderGO.SetActive(false);
-        }
 
         debugPose[15].text = DateTime.UtcNow.ToString();  //DateTime.Now.ToString();
     }
 
     public void StartAR() 
     {
-        startARButton.SetActive(false);
-        setLocalizeProgress(true);
-        introMessagePanel.SetActive(false);
+        SetStartARButton(false);
+        SetLocalizeProgress(true);
+        SetIntroMessagePanel(false);
         StartCoroutine(StartARC());
     }
 
+    public void SetStartARButton(bool act)
+    {
+        foreach (SkinMain skin in skins)
+        {
+            if (skin.startARButton != null) skin.startARButton.SetActive(act);
+        }
+    }
+
+
+    public void SetIntroMessagePanel(bool act)
+    {
+        foreach (SkinMain skin in skins)
+        {
+            if (skin.introMessagePanel != null) skin.introMessagePanel.SetActive(act);
+        }
+    }
+
+    public void SetNotLocalizedForSomeTime(bool act) 
+    {
+        foreach (SkinMain skin in skins)
+        {
+            if (skin.notLocalizedForSomeTime != null) skin.notLocalizedForSomeTime.SetActive(act);
+        }
+    }
     IEnumerator StartARC()
     {
         yield return new WaitForEndOfFrame();
@@ -277,54 +303,45 @@ public class UIManager : MonoBehaviour
 
     public void Located()
     {
-        setLowPanelButtons(true);
-        //setMenuButtons(true);
-        //setMapButtons(true);
-        setLocalizeProgress(false);
-        setColorCenterImage();
+        SetLowPanelButtons(true);
+        SetLocalizeProgress(false);
     }
 
     public void setLocateButton(bool act)
     {
-        locateButton.SetActive(act);
+        foreach (SkinMain skin in skins)
+        {
+            skin.locateButton.SetActive(act);
+        }
     }
-    public void setLowPanelButtons(bool act)
+    public void SetLowPanelButtons(bool act)
     {
-        lowPanelButtons.SetActive(act);
+        foreach (SkinMain skin in skins)
+        {
+            if (skin.lowPanelButtons != null) skin.lowPanelButtons.SetActive(act);
+        }
     }
-    public void setMapButtons(bool act)
+    public void SetMenuButtons(bool act)
     {
-        mapButtons.SetActive(act);
-    }
-    public void setMenuButtons(bool act)
-    {
-        menuButtons.SetActive(act);
+        foreach (SkinMain skin in skins)
+        {
+            if (skin.menuButtons != null) skin.menuButtons.SetActive(act);
+        }
     }
 
-    public void setLocalizeProgress(bool act)
+    public void SetLocalizeProgress(bool act)
     {
         Debug.Log("UI.setLocalizeProgress(" + act + ")");
-        localizeProgress.SetActive(act);
-    }
-
-    public void setColorCenterImage()
-    {
-        centerImage.GetComponent<Image>().color = Color.yellow;
+        foreach (SkinMain skin in skins)
+        {
+            if (skin.localizeProgress != null) skin.localizeProgress.SetActive(act);
+        }
     }
 
     public void SetServ(Text tt)
     {
         Debug.Log("UI.SetServ() =" + tt.text);
         PlayerPrefs.SetString("ApiUrl", tt.text);
-    }
-
-    public void CreateNewObject()
-    {
-        GameObject go = new GameObject("temp");
-        go.transform.position = aRcamera.transform.position;
-        go.transform.Translate(aRcamera.transform.forward*3);
-        GameObject newObj = Instantiate(newObject);
-        newObj.transform.position = go.transform.position;
     }
 
     public void AddToReco() {
@@ -398,8 +415,8 @@ public class UIManager : MonoBehaviour
 
     public void DemoModeOff(bool mode)
     {
-        menuButtons.SetActive(mode);
-        lowPanelButtons.SetActive(mode);
+        SetMenuButtons(mode);
+        SetLowPanelButtons(mode);
     }
 
     public void Orient()

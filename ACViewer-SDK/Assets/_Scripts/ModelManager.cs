@@ -111,21 +111,6 @@ public class ModelManager : MonoBehaviour
         Destroy(go);
     }
 
-    public void BackToChoice()
-    {
-        if (activeModel != null)
-        {
-            activeModel.GetComponent<AssetLoader>().StopLoad();
-            Destroy(activeModel);
-        }
-        uim.newObjButton.SetActive(true);
-        uim.addButton.SetActive(false);
-
-        if (pl != null) Destroy(pl);
-        if (ground != null) Destroy(ground);
-        if (shadowObj != null) Destroy(shadowObj);
-    }
-
     public bool GetEditMode()
     {
         return editModeOn;
@@ -134,17 +119,6 @@ public class ModelManager : MonoBehaviour
     public void SetEditMode(bool mode)
     {
         editModeOn = mode;
-    }
-
-    public void DeleteMenu(GameObject goToDelete, string objectId)
-    {
-        if (objectId != null)
-        {
-            modelToDelete = goToDelete;
-            objectIdToDelete = objectId;
-            Debug.Log(goToDelete + "        " + objectId);
-            uim.editDeletePanel.SetActive(true);
-        }
     }
 
 }

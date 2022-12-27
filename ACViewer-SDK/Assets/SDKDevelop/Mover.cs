@@ -179,7 +179,6 @@ public class Mover : MonoBehaviour
                 if (timer > modelManager.timeForLongTap)
                 {
                     Debug.Log(name + " LONG COLIDER DOWN!");
-                    modelManager.DeleteMenu(this.gameObject, objectId);
                     // longTap.SetActive(true);
                     //  setLocked(false);
                 }

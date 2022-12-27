@@ -483,8 +483,8 @@ public class GetPlaceHoldersDev : MonoBehaviour
     {
         firstStart = true;
         ARStarted  = false;
-        uim.localizeProgress.SetActive(false);
-        uim.notLocalizedForSomeTime.SetActive(true);
+        uim.SetLocalizeProgress(false);
+        uim.SetNotLocalizedForSomeTime(true);
         cantLocTimer = cantLocTimerDef;
     }
 

@@ -4,19 +4,61 @@ using UnityEngine;
 
 public class UISplashController : MonoBehaviour
 {
-    [SerializeField] GameObject panelInstruction;
-    [SerializeField] GameObject panelNotInPlace;
-    [SerializeField] GameObject panelNoGeoPermisson;
+    [System.Serializable]
+    public class SkinSplash
+    {
+        public string name;
+        public GameObject mainPanel;
+        public GameObject panelInstruction;
+        public GameObject panelNotInPlace;
+        public GameObject panelNoGeoPermisson;
+    }
+
+    [SerializeField] GameObject mainSkin;
+    [SerializeField] SkinSplash[] skins;
 
     public void SetZoneControllerUI()
     {
-        if (PlayerPrefs.GetInt("Instruction") == 1)
+        foreach (SkinSplash skin in skins)
         {
-            panelInstruction.SetActive(true);
+            if (PlayerPrefs.GetString("skin").ToLower().Contains(skin.name.ToLower())) 
+            {
+                mainSkin.SetActive(false);
+                skin.mainPanel.SetActive(true);
+            }
+
+            if (PlayerPrefs.GetInt("Instruction") == 1)
+            {
+                skin.panelInstruction.SetActive(true);
+            }
+            else
+            {
+                skin.panelInstruction.SetActive(false);
+            }
+
+            if (PlayerPrefs.GetInt("NotInPlace") == 1)
+            {
+                skin.panelNotInPlace.SetActive(true);
+            }
+            else
+            {
+                skin.panelNotInPlace.SetActive(false);
+            }
+
+        }
+    /*    if (PlayerPrefs.GetInt("Instruction") == 1)
+            {   
+            foreach (Skin skin in skins)
+            {
+                skin.panelInstruction.SetActive(true);
+            }
         }
         else
         {
-            panelInstruction.SetActive(false);
+            foreach (Skin skin in skins)
+            {
+                panelInstruction.SetActive(false);
+            }
         }
 
         if (PlayerPrefs.GetInt("NotInPlace") == 1)
@@ -26,11 +68,14 @@ public class UISplashController : MonoBehaviour
         else
         {
             panelNotInPlace.SetActive(false);
-        }
+        }*/
     }
 
-    public void NoGeoPermisson() 
+    public void NoGeoPermisson()
     {
-        panelNoGeoPermisson.SetActive(true);
+        foreach (SkinSplash skin in skins)
+        {
+            skin.panelNoGeoPermisson.SetActive(true);
+        }
     }
 }
