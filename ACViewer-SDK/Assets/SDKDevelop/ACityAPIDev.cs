@@ -75,6 +75,7 @@ public class ACityAPIDev : MonoBehaviour
         public Vector4 orientations;
 
         public Vector3[] positions;
+        public string mainId;
         public string sDescription;
         public string sPath;
         public string sText;
@@ -153,6 +154,7 @@ public class ACityAPIDev : MonoBehaviour
     public bool ecef;
     public bool useGeopose;
     UnityPose oldUPose;
+    GeoPose currentGeoPoseCamera = new GeoPose();
 
     ScreenOrientation ori;
 
@@ -168,6 +170,8 @@ public class ACityAPIDev : MonoBehaviour
     bool GPSlocation;
     string apiURL => URLs.CurrentUrl;
     Action<string, Transform, StickerInfo[]> getStickersAction;
+    Action<StickerInfo[]> getObjects;
+    Action<string, Transform> getGeoCamera;
     List<RecoInfo> recoList = new List<RecoInfo>();
 
     LocalizationStatus localizationStatus = LocalizationStatus.NotStarted;
@@ -228,6 +232,9 @@ public class ACityAPIDev : MonoBehaviour
         if (nr == NetworkReachability.NotReachable                  ) uim.statusDebug("No internet");
         if (nr == NetworkReachability.ReachableViaCarrierDataNetwork) uim.statusDebug("Mobile internet");
         if (nr == NetworkReachability.ReachableViaLocalAreaNetwork  ) uim.statusDebug("Wifi");
+        currentGeoPoseCamera.lat = 0f;
+        currentGeoPoseCamera.lon = 0f;
+        currentGeoPoseCamera.h = 0f;
     }
 
     public void SetOSCPusage(bool os)
@@ -359,7 +366,164 @@ public class ACityAPIDev : MonoBehaviour
         return null;
     }
 
-    public void camLocalize(string jsonanswer, bool geopose)
+    void CamParserGeoPose(string jsonanswer)
+    {
+        var jsonParse = JSON.Parse(jsonanswer);
+        float px, py, pz, ox, oy, oz, ow;
+        string js, sessionId;
+        sessionId = "1"; // jsonParse["geopose"]["reconstruction_id"];  // don't change the session as geopose SC is global
+        string debugSessionId = jsonParse["geopose"]["reconstruction_id"];
+        Debug.Log("sessioID: " + debugSessionId);
+
+        Debug.Log("+++CamParserGeoPose");
+
+        double camLat = 0, camLon = 0, camHei = 0;
+        double px0 = 0, py0 = 0, pz0 = 0;
+        px = 0; py = 0; pz = 0; // reset position initially
+        EcefPose zeroEcefCam = new EcefPose();
+        GeoPose zeroGeoCam = new GeoPose();
+        bool newGeoPose = false;
+        RecoInfo currentRi = checkRecoID(sessionId);
+        if (currentRi == null)
+        {
+            currentRi = new RecoInfo();
+            currentRi.id = sessionId;
+        }
+            //if (!string.IsNullOrEmpty(checkNewGeo)) {  }
+
+        if (ecef)
+        {
+            px0 = jsonParse["geopose"]["ecefPose"]["position"]["x"].AsDouble;
+            py0 = jsonParse["geopose"]["ecefPose"]["position"]["y"].AsDouble;
+            pz0 = jsonParse["geopose"]["ecefPose"]["position"]["z"].AsDouble;
+            ox = jsonParse["geopose"]["ecefPose"]["quaternion"]["x"].AsFloat;
+            oy = jsonParse["geopose"]["ecefPose"]["quaternion"]["y"].AsFloat;
+            oz = jsonParse["geopose"]["ecefPose"]["quaternion"]["z"].AsFloat;
+            ow = jsonParse["geopose"]["ecefPose"]["quaternion"]["w"].AsFloat;
+            if (currentRi == null)
+            {
+                zeroEcefCam.x = px0;
+                zeroEcefCam.y = py0;
+                zeroEcefCam.z = pz0;
+                uim.setDebugPose(0.001f, py, pz, ox, oy, oz, ow, debugSessionId);
+            }
+            else
+            {
+                px = (float)(px0 - zeroEcefCam.x);
+                py = (float)(py0 - zeroEcefCam.y);
+                pz = (float)(pz0 - zeroEcefCam.z);
+                uim.setDebugPose(px, py, pz, ox, oy, oz, ow, debugSessionId);
+            }
+            //Debug.Log("ecef.quat = " + ox + "--" + oy + "--" + oz + "--" + ow);
+        }
+        else if (useGeopose)
+        {
+            string checkNewGeo = jsonParse["geopose"]["position"]["lat"];
+            if (!string.IsNullOrEmpty(checkNewGeo)) { newGeoPose = true; }
+
+            if (newGeoPose)
+            {
+                camLat = jsonParse["geopose"]["position"]["lat"].AsDouble;
+                camLon = jsonParse["geopose"]["position"]["lon"].AsDouble;
+                camHei = jsonParse["geopose"]["position"]["h"].AsDouble;
+                Debug.Log("Cam GEO_v10 - lat = " + camLat + ", lon = " + camLon + ", h = " + camHei);
+
+                ox = jsonParse["geopose"]["quaternion"]["x"].AsFloat;
+                oy = jsonParse["geopose"]["quaternion"]["y"].AsFloat;
+                oz = jsonParse["geopose"]["quaternion"]["z"].AsFloat;
+                ow = jsonParse["geopose"]["quaternion"]["w"].AsFloat;
+            }
+            else
+            {
+                camLat = jsonParse["geopose"]["pose"]["latitude"].AsDouble;
+                camLon = jsonParse["geopose"]["pose"]["longitude"].AsDouble;
+                camHei = jsonParse["geopose"]["pose"]["ellipsoidHeight"].AsDouble;
+                Debug.Log("Cam GEO_v01 - lat = " + camLat + ", lon = " + camLon + ", ellH = " + camHei);
+
+                ox = jsonParse["geopose"]["pose"]["quaternion"]["x"].AsFloat;
+                oy = jsonParse["geopose"]["pose"]["quaternion"]["y"].AsFloat;
+                oz = jsonParse["geopose"]["pose"]["quaternion"]["z"].AsFloat;
+                ow = jsonParse["geopose"]["pose"]["quaternion"]["w"].AsFloat;
+            }
+
+            zeroGeoCam.lat = camLat;
+            zeroGeoCam.lon = camLon;
+            zeroGeoCam.h = camHei;
+            currentGeoPoseCamera.lat = camLat;
+            currentGeoPoseCamera.lon = camLon;
+            currentGeoPoseCamera.h = camHei;
+            Debug.Log("ZERO " + zeroGeoCam.lat);
+            Vector3 enupose = EcefToEnu(GeodeticToEcef(camLat, camLon, camHei), zeroGeoCam.lat, zeroGeoCam.lon, zeroGeoCam.h);
+            //Debug.Log("Cam GEO enupose x = " + enupose.x + ", y = " + enupose.y + ", z = " + enupose.z);
+
+            px = enupose.x;
+            py = enupose.y;
+            pz = enupose.z;
+            //Debug.Log("geo.quat = " + ox + "--" + oy + "--" + oz + "--" + ow);
+            if (currentRi == null)
+                uim.setDebugPose(0.001f, py, pz, ox, oy, oz, ow, debugSessionId);
+            else
+                uim.setDebugPose(px, py, pz, ox, oy, oz, ow, debugSessionId);
+        }
+        else
+        {
+            px = jsonParse["geopose"]["localPose"]["position"]["x"].AsFloat;
+            py = jsonParse["geopose"]["localPose"]["position"]["y"].AsFloat;
+            pz = jsonParse["geopose"]["localPose"]["position"]["z"].AsFloat;
+            ox = jsonParse["geopose"]["localPose"]["orientation"]["x"].AsFloat;
+            oy = jsonParse["geopose"]["localPose"]["orientation"]["y"].AsFloat;
+            oz = jsonParse["geopose"]["localPose"]["orientation"]["z"].AsFloat;
+            ow = jsonParse["geopose"]["localPose"]["orientation"]["w"].AsFloat;
+            uim.setDebugPose(px, py, pz, ox, oy, oz, ow, debugSessionId);
+        }
+        GameObject newCam = new GameObject("tempCam");
+        UnityPose uPose = new UnityPose(new Vector3(px, py, pz), new Quaternion(ox, oy, oz, ow));
+        if (oldUPose != null) 
+        {
+            uim.debugPose[18].text = "DbGL: " + (uPose.pos - oldUPose.pos).magnitude;
+        }
+        oldUPose = uPose;
+        newCam.transform.localPosition = uPose.pos;
+        newCam.transform.localRotation = uPose.ori;
+
+        if (ecef)                                   // ecef pose
+        {
+            uPose.SetCameraOriFromGeoPose(newCam);  // Add additional 2 rotations for camera
+        }
+        else if (useGeopose)                        // geopose based on ENU
+        {
+            uPose.SetCameraOriFromGeoPose(newCam);  // Add additional 2 rotations for camera
+        }
+                Debug.Log("camLocalize: newPos="
+                    + newCam.transform.localPosition.x + ", "
+                    + newCam.transform.localPosition.y + ", "
+                    + newCam.transform.localPosition.z);
+                Debug.Log("camLocalize: newRot=" + newCam.transform.localRotation.eulerAngles);
+
+        GameObject zeroCoord = new GameObject("Zero");
+        zeroCoord.transform.SetParent(newCam.transform);
+
+
+       if (zeroCoord.transform.eulerAngles == Vector3.zero)
+            {
+                newCam.transform.position = cameraPositionInLocalization;
+                newCam.transform.eulerAngles = cameraRotationInLocalization;
+            }
+            currentRi.lastCamCoordinate = new Vector3(px, py, pz);
+            localizationStatus = LocalizationStatus.Ready;
+
+            uim.statusDebug("Localized");
+            Debug.Log("camLocalize: +++getStickersAction");
+            getGeoCamera(sessionId, zeroCoord.transform);
+            Debug.Log("camLocalize: ---getStickersAction");
+            uim.statusDebug("Parsed");
+            
+            Destroy(newCam);
+
+    }
+
+
+    public void camLocalize(string jsonanswer, bool geopose, bool noCamera)
     {
         var jsonParse = JSON.Parse(jsonanswer);
         float px, py, pz, ox, oy, oz, ow;
@@ -611,7 +775,14 @@ public class ACityAPIDev : MonoBehaviour
                 do
                 {
                     objectsAmount++;
-                    js = jsonParse["scrs"][objectsAmount]["type"];
+                    if (noCamera)
+                    {
+                        js = jsonParse[objectsAmount]["id"];
+                    }
+                    else
+                    {
+                        js = jsonParse["scrs"][objectsAmount]["type"];
+                    }
                     //Debug.Log("js node [" + objectsAmount + "] - " + js);
                 } while (js != null);
 
@@ -695,6 +866,10 @@ public class ACityAPIDev : MonoBehaviour
                     {
                         zeroGeoCam = currentRi.zeroCamGeoPose;
                     }
+                    currentGeoPoseCamera.lat = camLat;
+                    currentGeoPoseCamera.lon = camLon;
+                    currentGeoPoseCamera.h = camHei;
+
                     Vector3 enupose = EcefToEnu(GeodeticToEcef(camLat, camLon, camHei), zeroGeoCam.lat, zeroGeoCam.lon, zeroGeoCam.h);
                     //Debug.Log("Cam GEO enupose x = " + enupose.x + ", y = " + enupose.y + ", z = " + enupose.z);
 
@@ -1005,6 +1180,141 @@ public class ACityAPIDev : MonoBehaviour
         Debug.Log("---camLocalize");
     }
 
+    void ParseObjects(string jsonanswer)
+    {
+        var jsonParse = JSON.Parse(jsonanswer);
+        int objectsAmount = -1;
+        string js;
+        float px, py, pz, ox, oy, oz, ow;
+        double tlat, tlon, thei;
+        do
+        {
+            objectsAmount++;
+            js = jsonParse[objectsAmount]["id"];
+        } while (js != null);
+        StickerInfo[] stickers = null;
+        if (objectsAmount > 0)
+        {
+            stickers = new StickerInfo[objectsAmount];
+            UnityPose uPose;
+            for (int j = 0; j < objectsAmount; j++)
+            {
+                stickers[j] = new StickerInfo();
+
+                // Object's position
+
+                    tlat = jsonParse[j]["content"]["geopose"]["position"]["lat"].AsDouble;
+                    tlon = jsonParse[j]["content"]["geopose"]["position"]["lon"].AsDouble;
+                    thei = jsonParse[j]["content"]["geopose"]["position"]["h"].AsDouble;
+
+                //Debug.Log("tlat = " + tlat + "; tlon = " + tlon + "; thei= " + thei);
+
+                // calc the object position relatively the recently localized camera
+                EcefPose epobj = GeodeticToEcef(tlat, tlon, thei);
+                    Vector3 enupose = EcefToEnu(epobj, currentGeoPoseCamera.lat, currentGeoPoseCamera.lon, currentGeoPoseCamera.h);
+                    px = enupose.x;
+                    py = enupose.y;
+                    pz = enupose.z;
+                    ox = jsonParse[j]["content"]["geopose"]["quaternion"]["x"].AsFloat;
+                    oy = jsonParse[j]["content"]["geopose"]["quaternion"]["y"].AsFloat;
+                    oz = jsonParse[j]["content"]["geopose"]["quaternion"]["z"].AsFloat;
+                    ow = jsonParse[j]["content"]["geopose"]["quaternion"]["w"].AsFloat;
+                uPose = new UnityPose(new Vector3(px, py, pz), new Quaternion(ox, oy, oz, ow));
+                stickers[j].mainPositions = uPose.pos;
+                stickers[j].orientations = uPose.SetObjectOriFromGeoPose();
+                stickers[j].positions = new Vector3[4];
+                for (int i = 0; i < 4; i++)
+                {
+                    stickers[j].positions[i] = UnityPose.GetPosition(px, py, pz);
+                }
+                stickers[j].mainId              = "" + jsonParse[j]["content"]["id"];
+                stickers[j].sPath               = "" + jsonParse[j]["content"]["custom_data"]["path"];
+                stickers[j].sText               = "" + jsonParse[j]["content"]["custom_data"]["sticker_text"];
+                stickers[j].sType               = "" + jsonParse[j]["content"]["custom_data"]["sticker_type"];
+                stickers[j].sSubType            = "" + jsonParse[j]["content"]["custom_data"]["sticker_subtype"];
+                stickers[j].sDescription        = "" + jsonParse[j]["content"]["custom_data"]["description"];
+                stickers[j].SModel_scale        = "" + jsonParse[j]["content"]["custom_data"]["model_scale"];
+                stickers[j].sId                 = "" + jsonParse[j]["content"]["custom_data"]["sticker_id"];
+                stickers[j].objectId            = "" + jsonParse[j]["content"]["custom_data"]["placeholder_id"];
+                stickers[j].sImage              = "" + jsonParse[j]["content"]["custom_data"]["Image"];
+                stickers[j].sOnTap              = "" + jsonParse[j]["content"]["custom_data"]["on_tap"];
+                stickers[j].sAddress            = "" + jsonParse[j]["content"]["custom_data"]["Address"];
+                stickers[j].sFeedbackAmount     = "" + jsonParse[j]["content"]["custom_data"]["Feedback amount"];
+                stickers[j].sRating             = "" + jsonParse[j]["content"]["custom_data"]["Rating"];
+                stickers[j].sUrl_ta             = "" + jsonParse[j]["content"]["custom_data"]["url_ta"];
+                stickers[j].sTrajectoryPath     = "" + jsonParse[j]["content"]["custom_data"]["trajectory_path"];
+                stickers[j].sTrajectoryOffset   = "" + jsonParse[j]["content"]["custom_data"]["trajectory_time_offset"];
+                stickers[j].sTrajectoryPeriod   = "" + jsonParse[j]["content"]["custom_data"]["trajectory_time_period"];
+                stickers[j].subType             = "" + jsonParse[j]["content"]["custom_data"]["subtype"];
+                stickers[j].type                = "" + jsonParse[j]["content"]["custom_data"]["type"];
+                stickers[j].bundleName          = "" + jsonParse[j]["content"]["custom_data"]["model_id"];
+                stickers[j].source              = "" + jsonParse[j]["content"]["custom_data"]["source"];
+                stickers[j].height              = "" + jsonParse[j]["content"]["custom_data"]["height"];
+                stickers[j].width               = "" + jsonParse[j]["content"]["custom_data"]["width"];
+
+                if (string.IsNullOrEmpty(stickers[j].bundleName))
+                {
+                    stickers[j].bundleName = "" + jsonParse[j]["content"]["custom_data"]["bundle_name"];
+                }
+                string groundeds = jsonParse[j]["content"]["custom_data"]["grounded"];
+                string verticals = jsonParse[j]["content"]["custom_data"]["vertically_aligned"];
+                if (groundeds != null)
+                {
+                    if (groundeds.Contains("1")) { stickers[j].grounded = true; }
+                }
+                if (verticals != null)
+                {
+                    if (verticals.Contains("1")) { stickers[j].vertical = true; }
+                }
+            }
+        }
+        getObjects(stickers);
+    }
+
+    public void GetGeoCameara(float langitude, float latitude, float hdop, string path, Action<string, Transform> getCameraGeo) 
+    {
+        getGeoCamera = getCameraGeo;
+
+        byte[] bjpg;
+        string framePath;
+        if (editorTestMode)
+        {
+            System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+            framePath = path;
+            bjpg = File.ReadAllBytes(framePath);
+            this.latitude = langitude;
+            this.longitude = latitude;
+        }
+        else
+        {
+            Debug.Log("firstLocalization: get frame");
+            bjpg = CamGetFrame();
+            Debug.Log("firstLocalization: got frame");
+            if (bjpg == null)
+            {
+                Debug.Log("Frame has got NULL!!!");
+                bjpg = bb.bytes;
+            }
+        }
+
+        cameraRotationInLocalization = ARCamera.transform.rotation.eulerAngles;
+        cameraPositionInLocalization = ARCamera.transform.position;
+        if (bjpg != null)
+        {
+            Debug.Log($"ACityAPIDev::GetGeoCameara apiURL = {apiURL}");
+            GetGeoCameraOSCP(bjpg, apiURL, langitude, latitude, hdop, CamParserGeoPose);
+        }
+
+
+        //FIX StartCoroutine(GetCameraGeoPoseSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string> getJsonCamera))
+    }
+
+    public void UpdateObjects(Action<StickerInfo[]> UpdateObj) 
+    {
+        getObjects = UpdateObj;
+        StartCoroutine(GetObjectsByGpsOSCP(apiURL, longitude, latitude, 100, ParseObjects));
+    }
+
     public void ARLocation(Action<string, Transform, StickerInfo[]> getStickers)
     {
         //if (!configurationSetted) SetCameraConfiguration();
@@ -1079,7 +1389,7 @@ public class ACityAPIDev : MonoBehaviour
         return rinfo;
     }
 
-    public void uploadFrame(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
+    public void uploadFrame(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool, bool> getJsonCameraObjects)
     {
         if (!useOSCP) {
             StartCoroutine(UploadJPGwithGPS(bytes, apiURL, langitude, latitude, hdop, getJsonCameraObjects));
@@ -1089,7 +1399,12 @@ public class ACityAPIDev : MonoBehaviour
         }
     }
 
-    IEnumerator UploadJPGwithGPSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
+    public void GetGeoCameraOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string> getJsonCameraObjects)
+    {
+         StartCoroutine(GetCameraGeoPoseSOSCP(bytes, apiURL, langitude, latitude, hdop, getJsonCameraObjects));
+    }
+
+    IEnumerator UploadJPGwithGPSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool, bool> getJsonCameraObjects)
     {
         Debug.Log("UploadGEO: buf.len=" + bytes.Length);
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
@@ -1146,10 +1461,127 @@ public class ACityAPIDev : MonoBehaviour
             Debug.Log("answer: rec-id:" + sid);
         }
         tempScale3d = 1;
-        getJsonCameraObjects(request.downloadHandler.text, true);
+        getJsonCameraObjects(request.downloadHandler.text, true, false);
     }
 
-    IEnumerator UploadJPGwithGPS(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool> getJsonCameraObjects)
+    IEnumerator GetCameraGeoPoseSOSCP(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string> getJsonCamera)
+    {
+        if (!editorTestMode)
+        {
+            yield return StartCoroutine(Locate(null));
+            langitude = this.latitude;
+            latitude = this.longitude;
+        }
+
+        Debug.Log("UploadGEO: buf.len=" + bytes.Length);
+        localizationStatus = LocalizationStatus.WaitForAPIAnswer;
+        rotationDevice = "90";
+        if (!editorTestMode)
+        {
+            rotationDevice = "270";  // Default value
+            if (Input.deviceOrientation == DeviceOrientation.PortraitUpsideDown) { rotationDevice = "90"; }
+        }
+
+        //string shot = System.Text.Encoding.UTF8.GetString(bytes);
+        string shot = Convert.ToBase64String(bytes);
+
+        string finalJson = "{\"id\":\"9089876676575754\",\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"type\":\"geopose\",\"sensors\":[{\"id\":\"0\",\"type\":\"camera\"},{\"id\":\"1\",\"type\":\"geolocation\"}],\"sensorReadings\":[{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"0\",\"reading\":{\"sequenceNumber\":0,\"imageFormat\":\"JPG\",\"imageOrientation\":{\"mirrored\":false,\"rotation\":" + rotationDevice + "},\"imageBytes\":\"" + shot + "\"}},{\"timestamp\":\"2020-11-11T11:56:21+00:00\",\"sensorId\":\"1\",\"reading\":{\"latitude\":" + langitude + ",\"longitude\":" + latitude + ",\"altitude\":0" + ",\"accuracy\":" + hdop + "}}]}";
+        Debug.Log("finalJson OSCP = " + finalJson);
+        Debug.Log(apiURL + "/scrs/geopose");
+
+        /* string path = "request.json";
+        File.Create(path);
+        yield return new WaitForSeconds(3);
+        StreamWriter writer = new StreamWriter(path, true, Encoding.UTF8, 1000000);
+        writer.WriteLine(finalJson);
+        writer.Close(); */
+
+        uim.gpsDebug(langitude, latitude, hdop);
+
+        var request = new UnityWebRequest(apiURL + "/scrs/geopose", "POST");
+        //var request = new UnityWebRequest(apiURL + "/scrs/geopose_objs", "POST");
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(finalJson);
+        request.uploadHandler = (UploadHandler)new UploadHandlerRaw(bodyRaw);
+        request.downloadHandler = (DownloadHandler)new DownloadHandlerBuffer();
+        request.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");
+        request.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
+        request.SetRequestHeader("Content-Type", "application/json");
+        request.uploadHandler.contentType = "application/json";
+        uim.statusDebug("Waiting response");
+        request.timeout = 50;
+        yield return request.SendWebRequest();
+        if (request.isNetworkError || request.isHttpError)
+        {
+            Debug.Log(request.error);
+            localizationStatus = LocalizationStatus.ServerError;
+        }
+        else
+        {
+            //Debug.Log("Finished Uploading Screenshot");
+        }
+        Debug.Log(request.downloadHandler.text);
+        var jsonParse = JSON.Parse(request.downloadHandler.text);
+        string sid = null;
+        if (jsonParse["camera"] != null)
+        {
+            sid = jsonParse["reconstruction_id"];   //FixMe: can be null?
+            Debug.Log("answer: rec-id:" + sid);
+        }
+        tempScale3d = 1;
+        getJsonCamera(request.downloadHandler.text);
+    }
+
+    IEnumerator GetObjectsByGpsOSCP(string apiURL, float langitude, float latitude, float radius, Action<string> UpdateStickers)
+    {
+        // Example https://developer.augmented.city/scrs?lat=59.907458&lon=30.298400&r=10
+        if (!editorTestMode)
+        {
+            yield return StartCoroutine(Locate(null));
+            langitude = this.latitude;
+            latitude = this.longitude;
+        }
+
+        string finalJson = apiURL + "/scrs?lat=" + latitude + "&lon=" + langitude + "&r=" + radius;
+        Debug.Log("finalJson OSCP GetObjects= " + finalJson);
+
+        /* string path = "request.json";
+        File.Create(path);
+        yield return new WaitForSeconds(3);t
+        StreamWriter writer = new StreamWriter(path, true, Encoding.UTF8, 1000000);
+        writer.WriteLine(finalJson);
+        writer.Close(); */
+
+        uim.gpsDebug(langitude, latitude, hdop);
+        var request = UnityWebRequest.Get(finalJson);
+        request.SetRequestHeader("Accept-Encoding", "gzip, deflate, br");
+        request.SetRequestHeader("Accept", "application/vnd.myplace.v2+json");
+
+
+        byte[] bodyRaw = Encoding.UTF8.GetBytes(finalJson);
+        request.timeout = 50;
+        yield return request.SendWebRequest();
+        if (request.isNetworkError || request.isHttpError)
+        {
+            Debug.Log(request.error);
+            localizationStatus = LocalizationStatus.ServerError;
+        }
+        else
+        {
+            //Debug.Log("Finished Uploading Screenshot");
+        }
+        Debug.Log(request.downloadHandler.text);
+        var jsonParse = JSON.Parse(request.downloadHandler.text);
+        string sid = null;
+        if (jsonParse["camera"] != null)
+        {
+            sid = jsonParse["reconstruction_id"];   //FixMe: can be null?
+            Debug.Log("answer: rec-id:" + sid);
+        }
+        tempScale3d = 1;
+        UpdateStickers(request.downloadHandler.text);
+    }
+
+    IEnumerator UploadJPGwithGPS(byte[] bytes, string apiURL, float langitude, float latitude, float hdop, Action<string, bool, bool> getJsonCameraObjects)
     {
         localizationStatus = LocalizationStatus.WaitForAPIAnswer;
         Debug.Log("bytes length = " + bytes.Length);
@@ -1247,7 +1679,7 @@ public class ACityAPIDev : MonoBehaviour
         }
         tempScale3d = 1;
 
-        getJsonCameraObjects(w.downloadHandler.text, false);
+        getJsonCameraObjects(w.downloadHandler.text, false, false);
     }
 
 
@@ -1332,7 +1764,10 @@ public class ACityAPIDev : MonoBehaviour
                                    + Input.location.lastData.altitude + " "
                                    + Input.location.lastData.horizontalAccuracy + " "
                                    + Input.location.lastData.timestamp);
-            getLocData(Input.location.lastData.latitude, Input.location.lastData.longitude, Input.location.lastData.horizontalAccuracy, null, null);
+            if (getLocData != null)
+            {
+                getLocData(Input.location.lastData.latitude, Input.location.lastData.longitude, Input.location.lastData.horizontalAccuracy, null, null);
+            }
             GPSlocation = true;
             longitude  = Input.location.lastData.longitude;     //FixMe: mix them up twice
             latitude   = Input.location.lastData.latitude;
@@ -1438,13 +1873,13 @@ public class ACityAPIDev : MonoBehaviour
         y0 = (h_ref + N) * cos_lambda * sin_phi;
         z0 = (h_ref + (1 - e_sq) * N) * sin_lambda;
 
-        Debug.Log("ep.x = " + ep.x + ", ep.y = " + ep.y + ",ep.z = " + ep.z);
+        //Debug.Log("ep.x = " + ep.x + ", ep.y = " + ep.y + ",ep.z = " + ep.z);
 
         double xd, yd, zd;
         xd = ep.x - x0;
         yd = ep.y - y0;
         zd = ep.z - z0;
-        Debug.Log("xd= " + xd + ", yd = " + yd + ",zd = " + zd);
+        //Debug.Log("xd= " + xd + ", yd = " + yd + ",zd = " + zd);
 
         double xEast, yNorth, zUp;
         xEast  = -sin_phi * xd + cos_phi * yd;
