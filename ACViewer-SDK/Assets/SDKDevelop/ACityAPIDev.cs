@@ -158,11 +158,6 @@ public class ACityAPIDev : MonoBehaviour
 
     ScreenOrientation ori;
 
-    const double a = 6378137;
-    const double b = 6356752.3142;
-    const double f = (a - b) / a;
-    const double e_sq = f * (2 - f);
-
     GameObject ARCamera;
     ARCameraManager m_CameraManager;
     bool startedLocalization;
@@ -453,7 +448,7 @@ public class ACityAPIDev : MonoBehaviour
             currentGeoPoseCamera.lon = camLon;
             currentGeoPoseCamera.h = camHei;
             Debug.Log("ZERO " + zeroGeoCam.lat);
-            Vector3 enupose = EcefToEnu(GeodeticToEcef(camLat, camLon, camHei), zeroGeoCam.lat, zeroGeoCam.lon, zeroGeoCam.h);
+            Vector3 enupose = MathTransforms.EcefToEnu(MathTransforms.GeodeticToEcef(camLat, camLon, camHei), zeroGeoCam.lat, zeroGeoCam.lon, zeroGeoCam.h);
             //Debug.Log("Cam GEO enupose x = " + enupose.x + ", y = " + enupose.y + ", z = " + enupose.z);
 
             px = enupose.x;
@@ -870,7 +865,7 @@ public class ACityAPIDev : MonoBehaviour
                     currentGeoPoseCamera.lon = camLon;
                     currentGeoPoseCamera.h = camHei;
 
-                    Vector3 enupose = EcefToEnu(GeodeticToEcef(camLat, camLon, camHei), zeroGeoCam.lat, zeroGeoCam.lon, zeroGeoCam.h);
+                    Vector3 enupose = MathTransforms.EcefToEnu(MathTransforms.GeodeticToEcef(camLat, camLon, camHei), zeroGeoCam.lat, zeroGeoCam.lon, zeroGeoCam.h);
                     //Debug.Log("Cam GEO enupose x = " + enupose.x + ", y = " + enupose.y + ", z = " + enupose.z);
 
                     px = enupose.x;
@@ -973,8 +968,8 @@ public class ACityAPIDev : MonoBehaviour
                                     thei = jsonParse["scrs"][j]["content"]["geopose"]["ellipsoidHeight"].AsDouble;
                                 }
                                 // calc the object position relatively the recently localized camera
-                                EcefPose epobj = GeodeticToEcef(tlat, tlon, thei);
-                                Vector3 enupose = EcefToEnu(epobj, camLat, camLon, camHei);
+                                EcefPose epobj = MathTransforms.GeodeticToEcef(tlat, tlon, thei);
+                                Vector3 enupose = MathTransforms.EcefToEnu(epobj, camLat, camLon, camHei);
                                 px = enupose.x;
                                 py = enupose.y;
                                 pz = enupose.z;
@@ -1210,8 +1205,8 @@ public class ACityAPIDev : MonoBehaviour
                 //Debug.Log("tlat = " + tlat + "; tlon = " + tlon + "; thei= " + thei);
 
                 // calc the object position relatively the recently localized camera
-                EcefPose epobj = GeodeticToEcef(tlat, tlon, thei);
-                    Vector3 enupose = EcefToEnu(epobj, currentGeoPoseCamera.lat, currentGeoPoseCamera.lon, currentGeoPoseCamera.h);
+                EcefPose epobj = MathTransforms.GeodeticToEcef(tlat, tlon, thei);
+                    Vector3 enupose = MathTransforms.EcefToEnu(epobj, currentGeoPoseCamera.lat, currentGeoPoseCamera.lon, currentGeoPoseCamera.h);
                     px = enupose.x;
                     py = enupose.y;
                     pz = enupose.z;
@@ -1827,69 +1822,6 @@ public class ACityAPIDev : MonoBehaviour
         Debug.Log("globalTimer = " + globalTimer);
     }
 
-
-    public EcefPose GeodeticToEcef(double lat, double lon, double h)
-    {
-        double lamb, phi, s, N;
-        lamb = lat * Mathf.Deg2Rad;
-        phi  = lon * Mathf.Deg2Rad;
-        s = Math.Sin(lamb);
-        N = a / Math.Sqrt(1 - e_sq * s * s);
-
-        double sin_lambda, cos_lambda, sin_phi, cos_phi;
-        sin_lambda = Math.Sin(lamb);
-        cos_lambda = Math.Cos(lamb);
-        sin_phi = Math.Sin(phi);
-        cos_phi = Math.Cos(phi);
-
-        double x, y, z;
-        x = (h + N) * cos_lambda * cos_phi;
-        y = (h + N) * cos_lambda * sin_phi;
-        z = (h + (1 - e_sq) * N) * sin_lambda;
-
-        EcefPose ep = new EcefPose();
-        ep.x = x;
-        ep.y = y;
-        ep.z = z;
-        return ep;
-    }
-
-    public Vector3 EcefToEnu(EcefPose ep, double lat_ref, double lon_ref, double h_ref)
-    {
-        double lamb, phi, s, N;
-        lamb = lat_ref * Mathf.Deg2Rad;
-        phi  = lon_ref * Mathf.Deg2Rad;
-        s = Math.Sin(lamb);
-        N = a / Math.Sqrt(1 - e_sq * s * s);
-
-        double sin_lambda, cos_lambda, sin_phi, cos_phi;
-        sin_lambda = Math.Sin(lamb);
-        cos_lambda = Math.Cos(lamb);
-        sin_phi = Math.Sin(phi);
-        cos_phi = Math.Cos(phi);
-
-        double x0, y0, z0;
-        x0 = (h_ref + N) * cos_lambda * cos_phi;
-        y0 = (h_ref + N) * cos_lambda * sin_phi;
-        z0 = (h_ref + (1 - e_sq) * N) * sin_lambda;
-
-        //Debug.Log("ep.x = " + ep.x + ", ep.y = " + ep.y + ",ep.z = " + ep.z);
-
-        double xd, yd, zd;
-        xd = ep.x - x0;
-        yd = ep.y - y0;
-        zd = ep.z - z0;
-        //Debug.Log("xd= " + xd + ", yd = " + yd + ",zd = " + zd);
-
-        double xEast, yNorth, zUp;
-        xEast  = -sin_phi * xd + cos_phi * yd;
-        yNorth = -cos_phi * sin_lambda * xd - sin_lambda * sin_phi * yd + cos_lambda * zd;
-        zUp    =  cos_lambda * cos_phi * xd + cos_lambda * sin_phi * yd + sin_lambda * zd;
-
-        //Debug.Log("xEast = "+ xEast + ",yNorth " + yNorth+ ",zUp" + zUp);
-
-        return new Vector3((float)xEast, (float)yNorth, (float)zUp);
-    }
 
     public string GetApiURL() {
         return apiURL;
